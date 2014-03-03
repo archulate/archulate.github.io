@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>使用jquery Mobile 与HTML5开发Web App - Archulate's Blog</title>
+  <meta name="author" content="李立夫">
+
+  
+  <meta name="description" content="&lt;p&gt;在本系列文章的开头，Kayo 曾经介绍过 Web App 的优缺点，并且说明了 HTML5 在其中起的作用，当然，Web Apps 的发展需要 HTML5 , CSS 与 JavaScript 以及后台技术的共同配合，但 HTML5 无疑为 Web Apps &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://archulate.github.io/blog/2013/02/03/jquery">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Archulate's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Archulate's Blog</a></h1>
+  
+    <h2>System maintence work blog</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:archulate.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">使用jquery Mobile 与HTML5开发Web App</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-03T18:11:25+08:00" pubdate data-updated="true">Feb 3<span>rd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!--more-->
+
+
+<pre><code>&lt;p&gt;在本系列文章的开头，Kayo 曾经介绍过 Web App 的优缺点，并且说明了 HTML5 在其中起的作用，当然，Web Apps 的发展需要 HTML5 , CSS 与 JavaScript 以及后台技术的共同配合，但 HTML5 无疑为 Web Apps 发展中一些重要的方面带来主要贡献。本文要阐述的，正是 HTML5 为 Web Apps 带来的各种影响，或者说，HTML5 究竟为 Web Apps 开发带来了什么改变。&lt;/p&gt;
+</code></pre>
+
+<h2>一. jQuery Mobile 与 HTML5</h2>
+
+
+<p>在具体说明 HTML5 如何使 Web Apps 开发发生改变前，首先回到本系列文章的另一个中心—— jQuery Mobile 。其实不难想象，倘若没有 jQuery Mobile 等其他移动开发框架，使用 HTML5 开发 Web Apps 实际上是一件非常困难的事，如果没有 jQuery Mobile ，开发者就必须在开发过程中独自解决至少以下几个问题：</p>
+
+
+<ul>
+<li>创建一个设备检测方案</li>
+<li>设计出适应不同移动设备的响应式方案</li>
+</ul>
+
+
+<p>上面仅仅是一个开始，如果开发者希望能创建一个出色的 Web Apps ，那么还可能需要考虑以下问题：</p>
+
+
+<ul>
+<li>设计一套适应移动设备用户使用的 UI</li>
+<li>模拟原生 Apps 的各种效果（过场动画等）</li>
+<li>模拟原生 Apps 的各种操作（划动等）</li>
+</ul>
+
+
+<p>更加麻烦的是，即使开发者完成了上面的各项要求，也必须独自调试，确保这些效果能在大多数移动设备上正确运行，尤其是需要长期开发时，开发者需要考虑的事情就更加复杂了。因此，jQuery Mobile 等移动开发框架在开发中实际是完成了大部分 CSS 和 JavaScript 的工作，包括开发的工作和在 Web Apps 制作中更为繁琐的调试工作，而 CSS 和 JavaScript 的开发往往也是移动开发中最费时的工作，这也是开发者可以利用 jQuery Mobile 进行快速开发的原因。</p>
+
+
+<p>也是因为以上的原因，这篇系列文章才会是“使用 jQuery Mobile 与 HTML5 开发 Web App”，而不是 HTML5 的独唱戏。当然，如果你需要一个完全个性化的样式，开发出自己的框架或核心主题也无妨。但对于小型的开发者，或者即使你有足够团队支持，但想要进行快速开发，使用 jQuery Mobile 等移动开发框架也会更加方便。</p>
+
+
+<p>当然，实际上 jQuery Mobile 也是一个 HTML5 框架，在 jQuery Mobile 之中也应用了 HTML5 的新技术，下面开始回归本文的主题 —— HTML5 对 Web Apps 的影响。</p>
+
+
+<h2>二. 你的编程方式</h2>
+
+
+<p>HTML5 确实为 Web 开发者带来了很多很酷的新特性，但如果你熟悉 HTML5 的新特性，会发现大多数 HTML5 的新特性都是使用 JavaScript 进行操作，即使再加上那些不是用 JavaScript 操作的特性，使用 HTML5 开发仍然没有改变 Web 前端开发者的编程方式——依旧还是使用标签包裹内容，依旧还是使用 CSS 设计样式，依旧还是使用 JavaScript 操作元素和进行交互。这是一件很好的事，开发者无须为 HTML5 开发付出重新适应编程方式的代价，因此，你只需在旧技术中拓展学习新的技术，而并不需要推倒重来。</p>
+
+
+<h2>三. HTML5 为 Web Apps 带来的提升</h2>
+
+
+<p>从技术层面上说，几乎每一项 HTML5 新特性都有种为 Web Apps 而设计的意味，W3C 更明确了某些 HTML5 特性是为 Web Apps 而设的，如 W3C 文档中 &#8220;Offline Web applications&#8221; 部分正文第一段开头便是：</p>
+
+
+<p>“In order to enable users to continue interacting with Web applications and documents even when their network connection is unavailable”</p>
+
+
+<p>当然，在这些新特性中有些特性会格外的惊艳，让开发者为之兴奋，除了在系列文章中介绍到的离线缓存，Offline Web applications ，Web Workers 外，Geolocation ，canvas ，Audio 和 Video 等特性都让 Web Apps 发生巨大的进步。下面 Kayo 再进一步说明一下几个主要特性为 Web Apps 带来的进步。</p>
+
+
+<p>关于离线缓存，Offline Web applications ，Web Workers 的详细介绍，请参考以下三篇文章：</p>
+
+
+<p><a href="http://kayosite.com/web-app-by-jquery-mobile-and-html5-web-storage.html" title="使用 jQuery Mobile 与 HTML5 开发 Web App —— HTML5 Web Storage" target="_blank">《使用 jQuery Mobile 与 HTML5 开发 Web App —— HTML5 Web Storage》</a></p>
+
+
+<p><a href="http://kayosite.com/web-app-by-jquery-mobile-and-html5-offline-web-applications.html" title="使用 jQuery Mobile 与 HTML5 开发 Web App —— HTML5 离线缓存" target="_blank">《使用 jQuery Mobile 与 HTML5 开发 Web App —— HTML5 离线缓存》</a></p>
+
+
+<p><a href="http://kayosite.com/web-app-by-jquery-mobile-and-html5-offline-web-workers.html" title="使用 jQuery Mobile 与 HTML5 开发 Web App —— HTML5 Web Workers" target="_blank">《使用 jQuery Mobile 与 HTML5 开发 Web App —— HTML5 Web Workers》</a></p>
+
+
+<h3>1. 离线缓存</h3>
+
+
+<p>与很多原生 Apps 不同，Web Apps 需要通过联网加载元素，这是 Web Apps 中一个致命的缺点，如果没有网络，Web Apps 将会完全失效。但 HTML5 的离线缓存 (Offline Web applications) 却改变了这一点，离线缓存可以方便地将 HTML 文档 , CSS , JavaScript 以及图片缓存到本地端，并且在缓存成功后优先加载本地端资源，这样导致了 Web Apps 的性能可以出现两种重要提升：</p>
+
+
+<p>依赖网络的 Web Apps（网络应用）可以通过离线缓存把占用带宽较高的资源缓存到本地，大大加快载入速度。同时利用缓存做出脱机时的响应状态。</p>
+
+
+<p>不依赖网络的 Web Apps（本地应用，单机游戏）可以在有网络连接时把整个程序缓存到本地，以后无须网络也可以正常使用。</p>
+
+
+<h3>2. Web Workers</h3>
+
+
+<p>Web Workers 可以在后台运行 JavaScript ，这意味着网页在执行 JavaScript 时可以不用锁定页面的 UI ，因此，可以把进行复杂运算的处理交给 Web Workers 并在后台运行，这样可以提升 UI 的友好度，并且减少浏览器（或标签）假死的情况。这样无论是对于 Web Apps 还是普通网页都是一种很好的改进，尤其是对于以应用为主的 Web Apps 。这类 Apps 用户操作较多，对 UI 的响应能力要求也更高，并且运行在相对于 PC 配置较低的移动设备上，使用 Web Workers 可以大大提升其性能。另外，Web Workers 可以实现多线程处理，解决了 JavaScript 单线程运行的问题，Apps 的执行效率也能因此提高。</p>
+
+
+<h3>3. Web Storage</h3>
+
+
+<p>Web Storage 可以把一些数据存储到本地，与 cookie 相似，但数据是完全存储在本地，并且数据量大很多，可以用于存储用户的数据或应用设置，这样可以方便的读取这些数据而不占用网络，对于 Web Apps 开发来说也很实用。</p>
+
+
+<p>以上这几个 HTML5 特性实质上都为 Web Apps 开发作出了同一类贡献——使到 Web Apps 相对原生 Apps 的劣势得以挽回（性能较低和依赖网络的劣势）。也许你会觉得这些特性没有 jQuery Mobile 为 Web Apps 带来的好处那么直观，但它确实从性能上提升了 Web Apps。你可以想象，离线缓存可以把大图片缓存到本地，Web Workers 使到用户操作页面时 UI 可以不用被锁定，这些特性带来的体验提升远胜于改进一个按钮的样式，改进一个栏目的布局。的确，比起外观，性能才从根本上决定了最终的用户体验。</p>
+
+
+<p>如上面所述，Geolocation ，canvas ，Audio 和 Video 也为 Web Apps 开发带来很多实用的价值，但相对于前面3点特性在性能方面改进了 Web Apps ，这几点新特性则可以丰富 Web Apps 的内容形式。另外，我们再回到 jQuery Mobile ，jQuery Mobile 实在也是依赖 HTML5 建立起来，其中 HTML5 的 data- 属性则起到了至关重要的作用，jQuery Mobile 利用 data- 这个 HTML5 中新增加的自定义属性为框架建立了各种组件和功能，综上所述，HTML5 为 Web Apps 带来的改进主要是以下三个方面：</p>
+
+
+<ul>
+<li>使到 Web Apps 相对原生 Apps 的劣势得以挽回，这里主要是性能较低和依赖网络的劣势</li>
+<li>提供了更加丰富的内容表现形式</li>
+<li>提高开发效率</li>
+</ul>
+
+
+<p>只有这些好处了？</p>
+
+
+<p>对，也就只有这些了，与 HTML4 很不相同，HTML5 更像是一个移动开发平台，但也只是一个平台，关键的开发还是需要开发者的努力。</p>
+
+
+<p>特别需要指出的是，在本文系列文章开头时，Kayo 还介绍了另一种 HTML5 的新特性—— Web SQL Database ，从实用性来上说，Web SQL Database 允许开发者在本地使用 SQL 数据库（SQLite），这是个很实用的功能，但很遗憾，由于 SQL 本身并不是一套统一的标准，因此 W3C 认为 Web SQL Database 也不能成为标准，并在10年的 W3C TPAC 中把 Web SQL Database 从“工作草案”的状态变更为“工作小组报告”，这意味 Web SQL Database 也不将被 W3C 推荐（不再更新），而以 Indexed Database 取而代之。</p>
+
+
+<h2>四. 需要渐进增强的设计</h2>
+
+
+<p>如果你已经阅读了上面列出的三篇文章，会发现 HTML5 在不同的平台和浏览器中的兼容性并不算是十分出色，即使你的 App 只需支持一、两个平台，但 HTML5 的某些特性在这些平台中仍有可能表现出较大的差异。因此，如果开发者使用 HTML5 进行 Web Apps 开发，那么就需要进行渐进增强的设计。关于渐进式设计，这里再一次引用 Kayo 在之前的文章中写过的一段关于渐进增强设计的描述：</p>
+
+
+<p>“前端设计时通过渐进增强功能来设计一直也是 Kayo 的设计想法，因为不同的平台，不同的设备有着不同的 Web 环境，因此对于一些出色的前端效果很难保证在每台设备上都呈现相同的效果，因此与其为了在所有设备上做到一样的效果而降低整体的前端样式，不如对于好的设备可以呈现更出色的效果，而基本的效果就兼容所有的设备。jQuery Mobile 的设计也是如此，核心的功能支持所有的设备，而较新的设备则可以获得更为优秀的页面效果。”</p>
+
+
+<p>如上面所述，jQuery Mobile 也是渐进增强设计的，事实上每个主流的移动开发框架都是基于渐进增强设计的，但开发者使用 HTML5 开发时仍需考虑 HTML5 方面的渐进增强设计，简而言之，开发者应该为 HTML5 新特性设计好一个备用解决方案。</p>
+
+
+<p>这里 Kayo 必须指出一点，渐进增强设计是必须从项目一开始就需要进行规划的设计，它意味着一个样式或功能需要同时考虑多种技术的支持情况，即考虑渐进增强设计必须从底层考虑，包括 Web Apps 功能上的设计，样式上的设计，目标用户群使用的主流平台和浏览器，这些开发者都必须从一开始就考虑清楚，决定 Web Apps 中哪些样式或功能需要考虑渐进增强，具体的解决办法又如何。</p>
+
+
+<p>举一个简单的例子，使用 Web Storage 的 localStorage 存储一些用户信息，不支持 localStorage 的浏览器使用 cookie 代替，这时开发者必须考虑两个问题——存储哪些信息？信息的大小和格式？localStorage 是直接保存在本地端的，cookie 则一般由 CGI 处理程序加密后再发送到本地，因此同时考虑两种技术的支持情况，密码这类重要的信息最好还是不要存储；localStorage 键值只支持字符串，cookie 的键值形式则可以更加丰富，因此同时考虑两种技术，这些信息最好是字符串的形式，或是由其他形式转为字符串形式后再保存。这样，两种技术才能在 Web Apps 开发中互相代替，最终的效果是使到设备在不支持更好的技术时可以优雅的降级到其他技术。</p>
+
+
+<h2>五. 解决方案与实例</h2>
+
+
+<p>现在，读者大概已经了解到使用 HTML5 开发一个 Web Apps 的各种影响了，HTML5 的新特性并没有改变你的编程方式，但却改变了你的开发过程。因此，即使开发者已经很熟悉网站开发，但如果需要长期开发 Web Apps ，仍要针对以上各项设计一个前端解决方案。当然，具体的解决方案可以有很多，这里 Kayo 以 jQuery Mobile 与 HTML5 开发为例，说明一个快速开发的解决方案。</p>
+
+
+<p>在说明解决方案之前，Kayo 首先介绍一下例子 Demo 的情况，例子是一个记事本功能的 Web Apps ，与本系列开头介绍过的<a href="http://kayosite.com/web-app-by-jquery-mobile-and-html5-principles.html" title="使用 jQuery Mobile 与 HTML5 开发 Web App ——开发原则" target="_blank">例子记事本</a>不一样，本例子中的事件输入会稍复杂一些，并且以 Mysql 数据库代替 Web SQL Database ，后台使用 PHP 。</p>
+
+
+<p>接下来，Kayo 介绍一下使用 jQuery Mobile 与 HTML5 快速开发 Web Apps 的一个解决方案：设备检测方案、响应式设计、UI、模拟原生 Apps 的各种效果和操作主要交给 jQuery Mobile 框架，选项存储使用 Web Storage ，并使用 manifest 存储静态的文件（CSS、JavaScript、图片），由于内容是动态生成的，因此页面文档没有使用 manifest 缓存，实际上，若开发者使用主流的移动开发框架进行 Web Apps 快速开发，都可以尝试使用这个方案，基本上这个方案已经可以调节好开发的需要与效率的问题。</p>
+
+
+<p>现在，可以打开下面的例子，感受 HTML5 开发 Web Apps 的魅力了！</p>
+
+
+<p>完整 <a href="http://jqmhtml5.sinaapp.com/" title="jQuery Mobile 与 HTML5 记事本" target="_blank">Demo</a>（在触摸环境中请使用 iphone/ipad ，Android 的系统默认浏览器浏览，桌面环境中请使用 Chrome 、Firefox 等现代浏览器浏览）。</p>
+
+
+<p><strong>小提示：1.触摸环境中在相应的事项上向右划动可以删除该事项，桌面环境中可以按住鼠标左键向右划动达到相同效果；2.为了方便用户测试，本记事本无须注册，直接打开即可使用，因此测试时请勿以个人重要信息进行测试，以免泄漏信息。</strong></p>
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">李立夫</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-03T18:11:25+08:00" pubdate data-updated="true">Feb 3<span>rd</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/05/13/spring/" title="Previous Post: spring AOP详解">&laquo; spring AOP详解</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/03/03/html5/" title="Next Post: 使用HTML5开发Android本地应用">使用HTML5开发Android本地应用 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+<p><img src="/images/blogImgs/about.jpg"></p> 
+ <p>A little something about me.</p>
+<p>李立夫，毕业于天津大学软件学院</p>
+<p>热爱开发，曾在firefox实习做系统运维，现于NNIT做系统运维师，有一年实习经验以及一年工作经验</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/hadoop/">Hadoop学习</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/mysql-install/">linux下关于mySQL的安装和配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs2/">Lvs核心ipvs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs/">Lvs简介</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/03/lvs-heartbeat/">使用LVS+Heartbeat配置Linux群集</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - 李立夫 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

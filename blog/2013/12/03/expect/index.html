@@ -1,0 +1,698 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Expect实现交互 - Archulate's Blog</title>
+  <meta name="author" content="李立夫">
+
+  
+  <meta name="description" content="使用expect脚本可以完成一定程度上的自动交互，不过又要学习了。
+关于expect的简单介绍。可以看这里 http://zh.wikipedia.org/zh/Expect
+下面我记录一下基本用法 expect脚本可以接受从bash传递过来的参数.可以使用[lindex $argv n]获得， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://archulate.github.io/blog/2013/12/03/expect">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Archulate's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Archulate's Blog</a></h1>
+  
+    <h2>System maintence work blog</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:archulate.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Expect实现交互</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-03T18:36:35+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!--more-->
+
+
+<p>使用expect脚本可以完成一定程度上的自动交互，不过又要学习了。<br />
+关于expect的简单介绍。可以看这里 <a href="http://zh.wikipedia.org/zh/Expect" target="_blank"><a href="http://zh.wikipedia.org/zh/Expect">http://zh.wikipedia.org/zh/Expect</a></a><br />
+下面我记录一下基本用法</p></p>
+
+<hr />
+
+
+<p>expect脚本可以接受从bash传递过来的参数.可以使用[lindex $argv n]获得，n从0开始，分别表示第一个,第二个,第三个&#8230;.参数<br />
+看下面的expect脚本的例子</p>
+
+
+<p></p>
+
+
+<!-- Crayon Syntax Highlighter v2.5.0 -->
+
+
+<pre><code>    &lt;div id="crayon-53145a9320430229454941" class="crayon-syntax crayon-theme-classic crayon-font-monaco crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style=" margin-top: 12px; margin-bottom: 12px; float: none; clear: both; font-size: 12px !important; line-height: 15px !important;"&gt;
+
+
+
+        &lt;div class="crayon-toolbar" data-settings=" mouseover overlay hide delay" style="font-size: 12px !important;height: 18px !important; line-height: 18px !important;"&gt;&lt;span class="crayon-title"&gt;&lt;/span&gt;
+
+        &lt;div class="crayon-tools" style="font-size: 12px !important;height: 18px !important; line-height: 18px !important;"&gt;&lt;div class="crayon-button crayon-nums-button" title="切换显示行编号"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-plain-button" title="纯文本显示代码"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-wrap-button" title="切换自动换行"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-expand-button" title="Expand Code"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-copy-button" title="Copy"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-popup-button" title="在新窗口中显示代码"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class="crayon-language"&gt;Shell&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+
+        &lt;div class="crayon-info" style="min-height: 16.8px !important; line-height: 16.8px !important;"&gt;&lt;/div&gt;
+
+        &lt;div class="crayon-plain-wrap"&gt;&lt;textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly style="-moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4; font-size: 12px !important; line-height: 15px !important;"&gt;
+</code></pre>
+
+<h1>!/usr/bin/expect</h1>
+
+<p>set username [lindex $argv 0]</p>
+
+<p>set password [lindex $argv 1]</p>
+
+<p>set server [lindex $argv 2]</p>
+
+<p>send_user  &ldquo;UserName is $username\n&rdquo;</p>
+
+<p>send_user  &ldquo;PassWord is $password\n&rdquo;</p>
+
+<p>send_user  &ldquo;Server is $server\n&rdquo;</p>
+
+<p>send_user &ldquo;Total arg num is $argc\n&rdquo;</p>
+
+<p>send_user &ldquo;last but one arg is[lindex $argv [expr $argc-1]]\n&rdquo;</p>
+
+<p>if { $argc != 3 &amp;&amp; $argc != 2 } {</p>
+
+<pre><code>send_user "Usage:username password \[server\] \n"
+
+send_user "\tthe default server is 211.65.64.1 \n"
+
+exit
+</code></pre>
+
+<p>}</textarea></div></p>
+
+<pre><code>        &lt;div class="crayon-main" style=""&gt;
+
+            &lt;table class="crayon-table"&gt;
+
+                &lt;tr class="crayon-row"&gt;
+
+            &lt;td class="crayon-nums " data-settings="show"&gt;
+
+                &lt;div class="crayon-nums-content" style="font-size: 12px !important; line-height: 15px !important;"&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320430229454941-1"&gt;1&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320430229454941-2"&gt;2&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320430229454941-3"&gt;3&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320430229454941-4"&gt;4&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320430229454941-5"&gt;5&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320430229454941-6"&gt;6&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320430229454941-7"&gt;7&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320430229454941-8"&gt;8&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320430229454941-9"&gt;9&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320430229454941-10"&gt;10&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320430229454941-11"&gt;11&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320430229454941-12"&gt;12&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320430229454941-13"&gt;13&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320430229454941-14"&gt;14&lt;/div&gt;&lt;/div&gt;
+
+            &lt;/td&gt;
+
+                    &lt;td class="crayon-code"&gt;&lt;div class="crayon-pre" style="font-size: 12px !important; line-height: 15px !important;"&gt;&lt;div class="crayon-line" id="crayon-53145a9320430229454941-1"&gt;&lt;span class="crayon-p"&gt;#!/usr/bin/expect&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320430229454941-2"&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-v"&gt;username&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;[&lt;/span&gt;&lt;span class="crayon-i"&gt;lindex&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argv&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;0&lt;/span&gt;&lt;span class="crayon-sy"&gt;]&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320430229454941-3"&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-v"&gt;password&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;[&lt;/span&gt;&lt;span class="crayon-i"&gt;lindex&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argv&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;1&lt;/span&gt;&lt;span class="crayon-sy"&gt;]&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320430229454941-4"&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-v"&gt;server&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;[&lt;/span&gt;&lt;span class="crayon-i"&gt;lindex&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argv&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;2&lt;/span&gt;&lt;span class="crayon-sy"&gt;]&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320430229454941-5"&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-s"&gt;"UserName is $username\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320430229454941-6"&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-s"&gt;"PassWord is $password\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320430229454941-7"&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-s"&gt;"Server is $server\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320430229454941-8"&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"Total arg num is $argc\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320430229454941-9"&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"last but one arg is[lindex $argv [expr $argc-1]]\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320430229454941-10"&gt;&lt;span class="crayon-st"&gt;if&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argc&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;!=&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;3&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argc&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;!=&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;2&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320430229454941-11"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"Usage:username password \[server\] \n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320430229454941-12"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"\tthe default server is 211.65.64.1 \n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320430229454941-13"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-r"&gt;exit&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320430229454941-14"&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/td&gt;
+
+                &lt;/tr&gt;
+
+            &lt;/table&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+</code></pre>
+
+<!-- [Format Time: 0.0039 seconds] -->
+
+
+
+
+<p></p>
+
+
+<p>执行这个文件./launch.exp 1 2 3<br />
+屏幕上就会分别打印出参数<br />
+send_user用来发送内容给用户。</p>
+
+
+<p>参数运用方面还有很多技巧<br />
+比如$argc 存储了参数个数，args被结构化成一个列表存在argv。$argv0 被初始化为脚本名字。<br />
+除此之外，如果你在第一行(#!那行)使用-d (debug参数)，可以在运行的时候输出一些很有用的信息<br />
+比如你会看见</p>
+
+
+<blockquote><p>argv[0] = /usr/bin/expect  argv[1] = -d  argv[2] = ./launch.exp  argv[3] = 1  argv[4] = 2  argv[5] = 3</p></blockquote>
+
+
+<p>使用这些也可以完成参数传递</p>
+
+
+<p>另外在spawn后面加一个interact,会从自动交互状态退出到输入状态，由用户完成剩余的操作.<br />
+ecpect也支持使用逻辑结构。基本语法和大多数shell语言；类似，不过使用{}而不是()<br />
+另外花括号前后的空格不容小觑，不写就会报错.</p>
+
+
+<p>&#8211; 是用来为划定选项尾的。<br />
+当需要像使用选项一样传一个参数，但希望这个参数不要被当作选项解释时，就需要用到这个选项。当阻止其他选项时，可以把它放在”#!”行中<br />
+#!/usr/local/bin/expect &#8211;<br />
+会让所有参数（包括脚本文件名）都存储在argv中。</p>
+
+
+<hr />
+
+
+<p>openVPN 59min重连脚本<br />
+学校的OpenVPN服务器非常恶心，每当用户登录时间经过60 min 09 s后就把用户踢下线。为了解决这个问日，我使用这个expect脚本来完成这个目的</p></p>
+
+<p></p>
+
+
+<!-- Crayon Syntax Highlighter v2.5.0 -->
+
+
+<pre><code>    &lt;div id="crayon-53145a9320440188879649" class="crayon-syntax crayon-theme-classic crayon-font-monaco crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style=" margin-top: 12px; margin-bottom: 12px; float: none; clear: both; font-size: 12px !important; line-height: 15px !important;"&gt;
+
+
+
+        &lt;div class="crayon-toolbar" data-settings=" mouseover overlay hide delay" style="font-size: 12px !important;height: 18px !important; line-height: 18px !important;"&gt;&lt;span class="crayon-title"&gt;&lt;/span&gt;
+
+        &lt;div class="crayon-tools" style="font-size: 12px !important;height: 18px !important; line-height: 18px !important;"&gt;&lt;div class="crayon-button crayon-nums-button" title="切换显示行编号"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-plain-button" title="纯文本显示代码"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-wrap-button" title="切换自动换行"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-expand-button" title="Expand Code"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-copy-button" title="Copy"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-popup-button" title="在新窗口中显示代码"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class="crayon-language"&gt;Shell&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+
+        &lt;div class="crayon-info" style="min-height: 16.8px !important; line-height: 16.8px !important;"&gt;&lt;/div&gt;
+
+        &lt;div class="crayon-plain-wrap"&gt;&lt;textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly style="-moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4; font-size: 12px !important; line-height: 15px !important;"&gt;
+</code></pre>
+
+<h1>!/usr/bin/expect</h1>
+
+<h1>openVPN 59min 自动重连脚本</h1>
+
+<h1>By <a href="http://ihipop.info">http://ihipop.info</a></h1>
+
+<h1>2010-12-26 11:21</h1>
+
+<p>set timeout 30</p>
+
+<p>set username [lindex $argv 0]</p>
+
+<p>set password [lindex $argv 1]</p>
+
+<h1>set server [lindex $argv 2]</h1>
+
+<h1>send_user  &ldquo;UserName is $username\n&rdquo;</h1>
+
+<h1>send_user &ldquo;Filename is $argv0 ,and args No.1-2 is :[lrange $argv 1 2] \n&rdquo;</h1>
+
+<h1>send_user &ldquo;Total arg num is $argc\n&rdquo;</h1>
+
+<p>if { $argc != 3 &amp;&amp; $argc != 2 } {</p>
+
+<pre><code>send_user "Usage:username password \[server\] \n"
+
+send_user "\tthe default server is 211.65.64.1 \n"
+
+exit
+</code></pre>
+
+<p>}</p>
+
+<p>spawn openvpn &mdash;config  rnas-school.ovpn</p>
+
+<p>expect &ldquo;Enter Auth Username:&rdquo;</p>
+
+<p>send &ldquo;$username\r&rdquo;</p>
+
+<p>expect &ldquo;Enter Auth Password:&rdquo;</p>
+
+<p>send &ldquo;$password\r&rdquo;</p>
+
+<p>expect &ldquo;Initialization Sequence Completed&rdquo;</p>
+
+<h1>interact</h1>
+
+<h1>等待59min后结束spawn</h1>
+
+<h1>exec sleep 3540</h1>
+
+<p>set timeout 3540</p>
+
+<p>exit</textarea></div></p>
+
+<pre><code>        &lt;div class="crayon-main" style=""&gt;
+
+            &lt;table class="crayon-table"&gt;
+
+                &lt;tr class="crayon-row"&gt;
+
+            &lt;td class="crayon-nums " data-settings="show"&gt;
+
+                &lt;div class="crayon-nums-content" style="font-size: 12px !important; line-height: 15px !important;"&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-1"&gt;1&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-2"&gt;2&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-3"&gt;3&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-4"&gt;4&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-5"&gt;5&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-6"&gt;6&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-7"&gt;7&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-8"&gt;8&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-9"&gt;9&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-10"&gt;10&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-11"&gt;11&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-12"&gt;12&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-13"&gt;13&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-14"&gt;14&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-15"&gt;15&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-16"&gt;16&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-17"&gt;17&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-18"&gt;18&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-19"&gt;19&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-20"&gt;20&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-21"&gt;21&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-22"&gt;22&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-23"&gt;23&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-24"&gt;24&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-25"&gt;25&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-26"&gt;26&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320440188879649-27"&gt;27&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320440188879649-28"&gt;28&lt;/div&gt;&lt;/div&gt;
+
+            &lt;/td&gt;
+
+                    &lt;td class="crayon-code"&gt;&lt;div class="crayon-pre" style="font-size: 12px !important; line-height: 15px !important;"&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-1"&gt;&lt;span class="crayon-p"&gt;#!/usr/bin/expect&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-2"&gt;&lt;span class="crayon-p"&gt;#openVPN 59min 自动重连脚本&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-3"&gt;&lt;span class="crayon-p"&gt;#By http://ihipop.info&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-4"&gt;&lt;span class="crayon-p"&gt;#2010-12-26 11:21&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-5"&gt;&amp;nbsp;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-6"&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-i"&gt;timeout&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;30&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-7"&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-v"&gt;username&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;[&lt;/span&gt;&lt;span class="crayon-i"&gt;lindex&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argv&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;0&lt;/span&gt;&lt;span class="crayon-sy"&gt;]&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-8"&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-v"&gt;password&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;[&lt;/span&gt;&lt;span class="crayon-i"&gt;lindex&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argv&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;1&lt;/span&gt;&lt;span class="crayon-sy"&gt;]&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-9"&gt;&lt;span class="crayon-p"&gt;#set server [lindex $argv 2]&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-10"&gt;&lt;span class="crayon-p"&gt;#send_user&amp;nbsp;&amp;nbsp;"UserName is $username\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-11"&gt;&lt;span class="crayon-p"&gt;#send_user "Filename is $argv0 ,and args No.1-2 is :[lrange $argv 1 2] \n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-12"&gt;&lt;span class="crayon-p"&gt;#send_user "Total arg num is $argc\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-13"&gt;&lt;span class="crayon-st"&gt;if&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argc&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;!=&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;3&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argc&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;!=&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;2&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-14"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"Usage:username password \[server\] \n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-15"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"\tthe default server is 211.65.64.1 \n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-16"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-r"&gt;exit&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-17"&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-18"&gt;&lt;span class="crayon-e"&gt;spawn &lt;/span&gt;&lt;span class="crayon-i"&gt;openvpn&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;--&lt;/span&gt;&lt;span class="crayon-e"&gt;config&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;rnas&lt;/span&gt;&lt;span class="crayon-o"&gt;-&lt;/span&gt;&lt;span class="crayon-v"&gt;school&lt;/span&gt;&lt;span class="crayon-e"&gt;.ovpn&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-19"&gt;&lt;span class="crayon-i"&gt;expect&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"Enter Auth Username:"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-20"&gt;&lt;span class="crayon-i"&gt;send&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"$username\r"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-21"&gt;&lt;span class="crayon-i"&gt;expect&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"Enter Auth Password:"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-22"&gt;&lt;span class="crayon-i"&gt;send&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"$password\r"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-23"&gt;&lt;span class="crayon-i"&gt;expect&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"Initialization Sequence Completed"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-24"&gt;&lt;span class="crayon-p"&gt;#interact&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-25"&gt;&lt;span class="crayon-p"&gt;#等待59min后结束spawn&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-26"&gt;&lt;span class="crayon-p"&gt;#exec sleep 3540&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320440188879649-27"&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-i"&gt;timeout&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;3540&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320440188879649-28"&gt;&lt;span class="crayon-r"&gt;exit&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/td&gt;
+
+                &lt;/tr&gt;
+
+            &lt;/table&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+</code></pre>
+
+<!-- [Format Time: 0.0062 seconds] -->
+
+
+
+
+<p></p>
+
+
+<p>然后上层用一个bash的永真循环来调用这个脚本，传递参数即可。</p>
+
+
+<hr />
+
+
+<h4>并行结构</h4>
+
+
+<p>上面的脚本是串行结构，其结果就是，当事态不按照他的发展来的时候，比如出现了异常输出输入请求，但是expect没有匹配到，expect就会一直等待到timeout(默认是10s)<br />
+所以为了增加程序健壮性，应该考虑使用并行结构</p>
+
+
+<p></p>
+
+
+<!-- Crayon Syntax Highlighter v2.5.0 -->
+
+
+<pre><code>    &lt;div id="crayon-53145a9320449729472440" class="crayon-syntax crayon-theme-classic crayon-font-monaco crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style=" margin-top: 12px; margin-bottom: 12px; float: none; clear: both; font-size: 12px !important; line-height: 15px !important;"&gt;
+
+
+
+        &lt;div class="crayon-toolbar" data-settings=" mouseover overlay hide delay" style="font-size: 12px !important;height: 18px !important; line-height: 18px !important;"&gt;&lt;span class="crayon-title"&gt;&lt;/span&gt;
+
+        &lt;div class="crayon-tools" style="font-size: 12px !important;height: 18px !important; line-height: 18px !important;"&gt;&lt;div class="crayon-button crayon-nums-button" title="切换显示行编号"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-plain-button" title="纯文本显示代码"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-wrap-button" title="切换自动换行"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-expand-button" title="Expand Code"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-copy-button" title="Copy"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-popup-button" title="在新窗口中显示代码"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class="crayon-language"&gt;Shell&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+
+        &lt;div class="crayon-info" style="min-height: 16.8px !important; line-height: 16.8px !important;"&gt;&lt;/div&gt;
+
+        &lt;div class="crayon-plain-wrap"&gt;&lt;textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly style="-moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4; font-size: 12px !important; line-height: 15px !important;"&gt;
+</code></pre>
+
+<h1>!/usr/bin/expect</h1>
+
+<h1>openVPN 59min 自动重连脚本</h1>
+
+<h1>By <a href="http://ihipop.info">http://ihipop.info</a></h1>
+
+<h1>2010-12-26 11:21</h1>
+
+<p>set timeout 30</p>
+
+<p>set username [lindex $argv 0]</p>
+
+<p>set password [lindex $argv 1]</p>
+
+<h1>set server [lindex $argv 2]</h1>
+
+<h1>send_user  &ldquo;UserName is $username\n&rdquo;</h1>
+
+<h1>send_user &ldquo;Filename is $argv0 ,and args No.1-2 is :[lrange $argv 1 2] \n&rdquo;</h1>
+
+<h1>send_user &ldquo;Total arg num is $argc\n&rdquo;</h1>
+
+<p>if { $argc != 3 &amp;&amp; $argc != 2 } {</p>
+
+<pre><code>send_user "Usage:username password \[server\] \n"
+
+send_user "\tthe default server is 211.65.64.1 \n"
+
+exit
+</code></pre>
+
+<p>}</p>
+
+<p>spawn openvpn &mdash;config  rnas-school.ovpn</p>
+
+<p>expect {</p>
+
+<p> &ldquo;Enter Auth Username:&rdquo; {</p>
+
+<p>  send &ldquo;$username\r&rdquo;</p>
+
+<p>  exp_continue</p>
+
+<p> }</p>
+
+<p> &ldquo;Enter Auth Password:&rdquo; {</p>
+
+<p>   send &ldquo;$password\r&rdquo;</p>
+
+<p>   exp_continue</p>
+
+<p> }</p>
+
+<p> &ldquo;Initialization Sequence Completed&rdquo; {</p>
+
+<p>   #interact</p>
+
+<p>   set timeout 3540</p>
+
+<p>   #set timeout 3</p>
+
+<p>   exp_continue</p>
+
+<p> }</p>
+
+<p> &ldquo;AUTH: Received AUTH_FAILED control message&rdquo; {</p>
+
+<p>   #interact</p>
+
+<p>   send_user &ldquo;AUTH_FAILED\n&rdquo;</p>
+
+<p>   exit</p>
+
+<p> }</p>
+
+<p> eof {</p>
+
+<p>   send_user &ldquo;eof\n&rdquo;</p>
+
+<p>   exit</p>
+
+<p> }</p>
+
+<p> timeout {</p>
+
+<p>   send \003</p>
+
+<p>   send_user &ldquo;timeout \n&rdquo;</p>
+
+<p>   exit</p>
+
+<p> }</p>
+
+<p>}</textarea></div></p>
+
+<pre><code>        &lt;div class="crayon-main" style=""&gt;
+
+            &lt;table class="crayon-table"&gt;
+
+                &lt;tr class="crayon-row"&gt;
+
+            &lt;td class="crayon-nums " data-settings="show"&gt;
+
+                &lt;div class="crayon-nums-content" style="font-size: 12px !important; line-height: 15px !important;"&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-1"&gt;1&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-2"&gt;2&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-3"&gt;3&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-4"&gt;4&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-5"&gt;5&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-6"&gt;6&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-7"&gt;7&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-8"&gt;8&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-9"&gt;9&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-10"&gt;10&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-11"&gt;11&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-12"&gt;12&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-13"&gt;13&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-14"&gt;14&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-15"&gt;15&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-16"&gt;16&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-17"&gt;17&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-18"&gt;18&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-19"&gt;19&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-20"&gt;20&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-21"&gt;21&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-22"&gt;22&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-23"&gt;23&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-24"&gt;24&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-25"&gt;25&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-26"&gt;26&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-27"&gt;27&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-28"&gt;28&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-29"&gt;29&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-30"&gt;30&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-31"&gt;31&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-32"&gt;32&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-33"&gt;33&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-34"&gt;34&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-35"&gt;35&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-36"&gt;36&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-37"&gt;37&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-38"&gt;38&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-39"&gt;39&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-40"&gt;40&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-41"&gt;41&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-42"&gt;42&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-43"&gt;43&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-44"&gt;44&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-45"&gt;45&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-46"&gt;46&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-47"&gt;47&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-48"&gt;48&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320449729472440-49"&gt;49&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320449729472440-50"&gt;50&lt;/div&gt;&lt;/div&gt;
+
+            &lt;/td&gt;
+
+                    &lt;td class="crayon-code"&gt;&lt;div class="crayon-pre" style="font-size: 12px !important; line-height: 15px !important;"&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-1"&gt;&lt;span class="crayon-p"&gt;#!/usr/bin/expect&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-2"&gt;&lt;span class="crayon-p"&gt;#openVPN 59min 自动重连脚本&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-3"&gt;&lt;span class="crayon-p"&gt;#By http://ihipop.info&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-4"&gt;&lt;span class="crayon-p"&gt;#2010-12-26 11:21&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-5"&gt;&amp;nbsp;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-6"&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-i"&gt;timeout&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;30&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-7"&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-v"&gt;username&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;[&lt;/span&gt;&lt;span class="crayon-i"&gt;lindex&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argv&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;0&lt;/span&gt;&lt;span class="crayon-sy"&gt;]&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-8"&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-v"&gt;password&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;[&lt;/span&gt;&lt;span class="crayon-i"&gt;lindex&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argv&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;1&lt;/span&gt;&lt;span class="crayon-sy"&gt;]&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-9"&gt;&lt;span class="crayon-p"&gt;#set server [lindex $argv 2]&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-10"&gt;&lt;span class="crayon-p"&gt;#send_user&amp;nbsp;&amp;nbsp;"UserName is $username\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-11"&gt;&lt;span class="crayon-p"&gt;#send_user "Filename is $argv0 ,and args No.1-2 is :[lrange $argv 1 2] \n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-12"&gt;&lt;span class="crayon-p"&gt;#send_user "Total arg num is $argc\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-13"&gt;&lt;span class="crayon-st"&gt;if&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argc&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;!=&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;3&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;$argc&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;!=&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;2&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-14"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"Usage:username password \[server\] \n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-15"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"\tthe default server is 211.65.64.1 \n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-16"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-r"&gt;exit&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-17"&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-18"&gt;&lt;span class="crayon-e"&gt;spawn &lt;/span&gt;&lt;span class="crayon-i"&gt;openvpn&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;--&lt;/span&gt;&lt;span class="crayon-e"&gt;config&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;rnas&lt;/span&gt;&lt;span class="crayon-o"&gt;-&lt;/span&gt;&lt;span class="crayon-v"&gt;school&lt;/span&gt;&lt;span class="crayon-e"&gt;.ovpn&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-19"&gt;&lt;span class="crayon-e"&gt;expect&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-20"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"Enter Auth Username:"&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-21"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;send&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"$username\r"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-22"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;exp_continue&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-23"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-24"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"Enter Auth Password:"&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-25"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-i"&gt;send&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"$password\r"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-26"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-i"&gt;exp_continue&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-27"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-28"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"Initialization Sequence Completed"&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-29"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-p"&gt;#interact&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-30"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-i"&gt;timeout&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;3540&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-31"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-p"&gt;#set timeout 3&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-32"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-i"&gt;exp_continue&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-33"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-34"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"AUTH: Received AUTH_FAILED control message"&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-35"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-p"&gt;#interact&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-36"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"AUTH_FAILED\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-37"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-r"&gt;exit&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-38"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-39"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-e"&gt;eof&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-40"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"eof\n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-41"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-r"&gt;exit&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-42"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-43"&gt;&amp;nbsp;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-44"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-e"&gt;timeout&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-45"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-i"&gt;send&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;\&lt;/span&gt;&lt;span class="crayon-cn"&gt;003&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-46"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-i"&gt;send_user&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"timeout \n"&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-47"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;span class="crayon-r"&gt;exit&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-48"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320449729472440-49"&gt;&amp;nbsp;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320449729472440-50"&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/td&gt;
+
+                &lt;/tr&gt;
+
+            &lt;/table&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+</code></pre>
+
+<!-- [Format Time: 0.0075 seconds] -->
+
+
+
+
+<p>上面看到的是把expect脚本单独运行的例子<br />
+其实也可以和bash脚本结合的很好<br />
+看下面的<a href="http://apt-blog.net/ssh_auto_login_in_shell_script" target="_blank">例子</a></p>
+
+
+<!-- Crayon Syntax Highlighter v2.5.0 -->
+
+
+<pre><code>    &lt;div id="crayon-53145a9320456801978064" class="crayon-syntax crayon-theme-classic crayon-font-monaco crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style=" margin-top: 12px; margin-bottom: 12px; float: none; clear: both; font-size: 12px !important; line-height: 15px !important;"&gt;
+
+
+
+        &lt;div class="crayon-toolbar" data-settings=" mouseover overlay hide delay" style="font-size: 12px !important;height: 18px !important; line-height: 18px !important;"&gt;&lt;span class="crayon-title"&gt;&lt;/span&gt;
+
+        &lt;div class="crayon-tools" style="font-size: 12px !important;height: 18px !important; line-height: 18px !important;"&gt;&lt;div class="crayon-button crayon-nums-button" title="切换显示行编号"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-plain-button" title="纯文本显示代码"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-wrap-button" title="切换自动换行"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-expand-button" title="Expand Code"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-copy-button" title="Copy"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="crayon-button crayon-popup-button" title="在新窗口中显示代码"&gt;&lt;div class="crayon-button-icon"&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class="crayon-language"&gt;Shell&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+
+        &lt;div class="crayon-info" style="min-height: 16.8px !important; line-height: 16.8px !important;"&gt;&lt;/div&gt;
+
+        &lt;div class="crayon-plain-wrap"&gt;&lt;textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly style="-moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4; font-size: 12px !important; line-height: 15px !important;"&gt;
+</code></pre>
+
+<h1>!/bin/bash</h1>
+
+<p>auto_smart_ssh () {</p>
+
+<pre><code>expect -c "set timeout -1;
+
+            spawn ssh -o StrictHostKeyChecking=no $2 ${@:3};
+
+            expect {
+
+                *assword:* {
+
+                    send $1\r;
+
+                    expect {
+
+                        *denied* {
+
+                            exit 2;
+
+                        }
+
+                        eof
+
+                    }
+
+                }
+
+                eof {
+
+                    exit 1;
+
+                }
+
+            }
+
+            "
+
+return $?
+</code></pre>
+
+<p>}</p>
+
+<p>auto_smart_ssh passwd user@host ls /var</p>
+
+<p>echo -e &ldquo;\n&mdash;-Exit Status: $?&rdquo;</textarea></div></p>
+
+<pre><code>        &lt;div class="crayon-main" style=""&gt;
+
+            &lt;table class="crayon-table"&gt;
+
+                &lt;tr class="crayon-row"&gt;
+
+            &lt;td class="crayon-nums " data-settings="show"&gt;
+
+                &lt;div class="crayon-nums-content" style="font-size: 12px !important; line-height: 15px !important;"&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-1"&gt;1&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-2"&gt;2&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-3"&gt;3&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-4"&gt;4&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-5"&gt;5&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-6"&gt;6&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-7"&gt;7&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-8"&gt;8&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-9"&gt;9&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-10"&gt;10&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-11"&gt;11&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-12"&gt;12&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-13"&gt;13&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-14"&gt;14&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-15"&gt;15&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-16"&gt;16&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-17"&gt;17&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-18"&gt;18&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-19"&gt;19&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-20"&gt;20&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-21"&gt;21&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-22"&gt;22&lt;/div&gt;&lt;div class="crayon-num" data-line="crayon-53145a9320456801978064-23"&gt;23&lt;/div&gt;&lt;div class="crayon-num crayon-striped-num" data-line="crayon-53145a9320456801978064-24"&gt;24&lt;/div&gt;&lt;/div&gt;
+
+            &lt;/td&gt;
+
+                    &lt;td class="crayon-code"&gt;&lt;div class="crayon-pre" style="font-size: 12px !important; line-height: 15px !important;"&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-1"&gt;&lt;span class="crayon-p"&gt;#!/bin/bash&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-2"&gt;&lt;span class="crayon-e"&gt;auto_smart_ssh&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;(&lt;/span&gt;&lt;span class="crayon-sy"&gt;)&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-3"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;expect&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;-&lt;/span&gt;&lt;span class="crayon-i"&gt;c&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;"&lt;span class="crayon-e"&gt;set &lt;/span&gt;&lt;span class="crayon-i"&gt;timeout&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;-&lt;/span&gt;&lt;span class="crayon-cn"&gt;1&lt;/span&gt;&lt;span class="crayon-sy"&gt;;&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-4"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-e"&gt;spawn &lt;/span&gt;&lt;span class="crayon-i"&gt;ssh&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;-&lt;/span&gt;&lt;span class="crayon-i"&gt;o&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-v"&gt;StrictHostKeyChecking&lt;/span&gt;&lt;span class="crayon-o"&gt;=&lt;/span&gt;&lt;span class="crayon-e"&gt;no&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;$&lt;/span&gt;&lt;span class="crayon-cn"&gt;2&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;$&lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;span class="crayon-sy"&gt;@&lt;/span&gt;&lt;span class="crayon-o"&gt;:&lt;/span&gt;&lt;span class="crayon-cn"&gt;3&lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;span class="crayon-sy"&gt;;&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-5"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-e"&gt;expect&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-6"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-o"&gt;*&lt;/span&gt;&lt;span class="crayon-i"&gt;assword&lt;/span&gt;&lt;span class="crayon-o"&gt;:&lt;/span&gt;&lt;span class="crayon-o"&gt;*&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-7"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;send&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;$&lt;/span&gt;&lt;span class="crayon-cn"&gt;1&lt;/span&gt;&lt;span class="crayon-sy"&gt;\&lt;/span&gt;&lt;span class="crayon-i"&gt;r&lt;/span&gt;&lt;span class="crayon-sy"&gt;;&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-8"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-e"&gt;expect&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-9"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-o"&gt;*&lt;/span&gt;&lt;span class="crayon-e"&gt;denied&lt;/span&gt;&lt;span class="crayon-o"&gt;*&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-10"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-r"&gt;exit&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;2&lt;/span&gt;&lt;span class="crayon-sy"&gt;;&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-11"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-12"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-i"&gt;eof&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-13"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-14"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-15"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-e"&gt;eof&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;{&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-16"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-r"&gt;exit&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-cn"&gt;1&lt;/span&gt;&lt;span class="crayon-sy"&gt;;&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-17"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-18"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-19"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;"&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-20"&gt;&lt;span class="crayon-h"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span class="crayon-st"&gt;return&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-sy"&gt;$&lt;/span&gt;&lt;span class="crayon-sy"&gt;?&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-21"&gt;&lt;span class="crayon-sy"&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-22"&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line" id="crayon-53145a9320456801978064-23"&gt;&lt;span class="crayon-e"&gt;auto_smart_ssh &lt;/span&gt;&lt;span class="crayon-e"&gt;passwd &lt;/span&gt;&lt;span class="crayon-i"&gt;user&lt;/span&gt;&lt;span class="crayon-sy"&gt;@&lt;/span&gt;&lt;span class="crayon-e"&gt;host &lt;/span&gt;&lt;span class="crayon-r"&gt;ls&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;/&lt;/span&gt;&lt;span class="crayon-t"&gt;var&lt;/span&gt;&lt;/div&gt;&lt;div class="crayon-line crayon-striped-line" id="crayon-53145a9320456801978064-24"&gt;&lt;span class="crayon-r"&gt;echo&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-o"&gt;-&lt;/span&gt;&lt;span class="crayon-i"&gt;e&lt;/span&gt;&lt;span class="crayon-h"&gt; &lt;/span&gt;&lt;span class="crayon-s"&gt;"\n---Exit Status: $?"&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/td&gt;
+
+                &lt;/tr&gt;
+
+            &lt;/table&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+</code></pre>
+
+<!-- [Format Time: 0.0055 seconds] -->
+
+
+<p>B
+B
+B
+B
+B</p>
+
+<p></p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">李立夫</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-03T18:36:35+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/10/13/mysql-optimizing/" title="Previous Post: mysql参数优化">&laquo; mysql参数优化</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/01/03/piranha/" title="Next Post: pranha方案实现WEB负载均衡">pranha方案实现WEB负载均衡 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+<p><img src="/images/blogImgs/about.jpg"></p> 
+ <p>A little something about me.</p>
+<p>李立夫，毕业于天津大学软件学院</p>
+<p>热爱开发，曾在firefox实习做系统运维，现于NNIT做系统运维师，有一年实习经验以及一年工作经验</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/hadoop/">Hadoop学习</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/mysql-install/">linux下关于mySQL的安装和配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs2/">Lvs核心ipvs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs/">Lvs简介</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/03/lvs-heartbeat/">使用LVS+Heartbeat配置Linux群集</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - 李立夫 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

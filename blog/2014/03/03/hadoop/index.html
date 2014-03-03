@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Hadoop学习 - Archulate's Blog</title>
+  <meta name="author" content="李立夫">
+
+  
+  <meta name="description" content="&nbsp;&nbsp;&nbsp; 这里先大致介绍一下Hadoop.&nbsp;&nbsp;&nbsp; 本文大部分内容都是从官网Hadoop上来的。其中有一篇介绍HDFS的pdf文档，里面对Hadoop介绍的比较全面了。我的这一个系列的Hadoop学习笔记也是从这里一步一步进行下来的， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://archulate.github.io/blog/2014/03/03/hadoop">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Archulate's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Archulate's Blog</a></h1>
+  
+    <h2>System maintence work blog</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:archulate.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Hadoop学习</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-03T19:23:42+08:00" pubdate data-updated="true">Mar 3<span>rd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!--more-->
+
+
+<p><div id="cnblogs_post_body"><span style="FONT-SIZE: 14pt">&nbsp;&nbsp;&nbsp; 这里先大致介绍一下Hadoop.<br>&nbsp;&nbsp;&nbsp; 本文大部分内容都是从官网</span><a title=Hadoop href="http://lucene.apache.org/hadoop"><span style="FONT-SIZE: 14pt">Hadoop</span></a><span style="FONT-SIZE: 14pt">上来的。其中有一篇</span><a title=介绍HDFS的pdf文档 href="http://lucene.apache.org/hadoop/hdfs_design.pdf"><span style="FONT-SIZE: 14pt">介绍HDFS的pdf文档</span></a><span style="FONT-SIZE: 14pt">，里面对Hadoop介绍的比较全面了。我的这一个系列的Hadoop学习笔记也是从</span><a title=这里 href="http://wiki.apache.org/lucene-hadoop/GettingStartedWithHadoop"><span style="FONT-SIZE: 14pt">这里</span></a><span style="FONT-SIZE: 14pt">一步一步进行下来的，同时又参考了网上的很多文章，对学习Hadoop中遇到的问题进行了归纳总结。<br>&nbsp;&nbsp;&nbsp; 言归正传，先说一下Hadoop的来龙去脉。谈到Hadoop就不得不提到</span><a title=Lucene href="http://lucene.apache.org/"><span style="FONT-SIZE: 14pt">Lucene</span></a><span style="FONT-SIZE: 14pt">和</span><a title=Nutch href="http://lucene.apache.org/nutch/"><span style="FONT-SIZE: 14pt">Nutch</span></a><span style="FONT-SIZE: 14pt">。首先，<span style="COLOR: #0000ff">Lucene并不是一个应用程序，而是提供了一个纯Java的高性能全文索引引擎工具包</span>，它可以方便的嵌入到各种实际应用中实现全文搜索/索引功能。<span style="COLOR: #0000ff">Nutch是一个应用程序，是一个以Lucene为基础实现的搜索引擎应用</span>，Lucene为Nutch提供了文本搜索和索引的API，Nutch不光有搜索的功能，还有数据抓取的功能。在nutch0.8.0版本之前，Hadoop还属于Nutch的一部分，而从nutch0.8.0开始，将其中实现的NDFS和MapReduce剥离出来成立一个新的开源项目，这就是Hadoop，而nutch0.8.0版本较之以前的Nutch在架构上有了根本性的变化，那就是完全构建在Hadoop的基础之上了。在Hadoop中实现了Google的GFS和MapReduce算法，使Hadoop成为了一个分布式的计算平台。<br>&nbsp;&nbsp;&nbsp;其实，Hadoop并不仅仅是一个用于存储的分布式文件系统，而是设计用来在由通用计算设备组成的大型集群上执行分布式应用的框架。<br><br>&nbsp;&nbsp;&nbsp;<span style="COLOR: #0000ff">Hadoop包含两个部分：</span><br><br>&nbsp;&nbsp;&nbsp;<strong>1、HDFS<br></strong><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;即Hadoop Distributed File System (Hadoop分布式文件系统)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HDFS具有高容错性，并且可以被部署在低价的硬件设备之上。HDFS很适合那些有大数据集的应用，并且提供了对数据读写的高吞吐率。HDFS是一个master/slave的结构，就通常的部署来说，在master上只运行一个Namenode，而在每一个slave上运行一个Datanode。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HDFS支持传统的层次文件组织结构，同现有的一些文件系统在操作上很类似，比如你可以创建和删除一个文件，把一个文件从一个目录移到另一个目录，重命名等等操作。Namenode管理着整个分布式文件系统，对文件系统的操作（如建立、删除文件和文件夹）都是通过Namenode来控制。&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;下面是HDFS的结构：</span><br></p>
+
+<p><div align=center src_cetemp="/images/cnblogs_com/wayne1017/HDFSArch.JPG"></p>
+
+<p><div align=center src_cetemp="/images/cnblogs_com/wayne1017/HDFSArch.JPG"><img height=645 alt="" src="http://images.cnblogs.com/cnblogs_com/wayne1017/HDFSArch.JPG" width=861 border=0></div></p>
+
+<p></div></p>
+
+<p><br><span style="FONT-SIZE: 14pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;从上面的图中可以看出，Namenode，Datanode，Client之间的通信都是建立在TCP/IP的基础之上的。当Client要执行一个写入的操作的时候，命令不是马上就发送到Namenode，Client首先在本机上临时文件夹中缓存这些数据，当临时文件夹中的数据块达到了设定的Block的值（默认是64M）时，Client便会通知Namenode，Namenode便响应Client的RPC请求，将文件名插入文件系统层次中并且在Datanode中找到一块存放该数据的block，同时将该Datanode及对应的数据块信息告诉Client，Client便这些本地临时文件夹中的数据块写入指定的数据节点。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HDFS采取了副本策略，其目的是为了提高系统的可靠性，可用性。HDFS的副本放置策略是三个副本，一个放在本节点上，一个放在同一机架中的另一个节点上，还有一个副本放在另一个不同的机架中的一个节点上。当前版本的hadoop0.12.0中还没有实现，但是正在进行中，相信不久就可以出来了。<br><br>&nbsp;&nbsp;&nbsp;<strong>2、MapReduce的实现<br></strong><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><a title=MapReduce href="http://labs.google.com/papers/mapreduce.html"><span style="FONT-SIZE: 14pt">MapReduce</span></a><span style="FONT-SIZE: 14pt">是Google 的一项重要技术，它是一个编程模型，用以进行大数据量的计算。对于大数据量的计算，通常采用的处理手法就是并行计算。至少现阶段而言，对许多开发人员来说，并行计算还是一个比较遥远的东西。MapReduce就是一种简化并行计算的编程模型，它让那些没有多少并行计算经验的开发人员也可以开发并行应用。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MapReduce的名字源于这个模型中的两项核心操作：Map和 Reduce。也许熟悉Functional Programming（</span><a title=函数式编程 href="http://chn.blogbeta.com/232.html"><span style="FONT-SIZE: 14pt">函数式编程</span></a><span style="FONT-SIZE: 14pt">）的人见到这两个词会倍感亲切。简单的说来，Map是把一组数据一对一的映射为另外的一组数据，其映射的规则由一个函数来指定，比如对[1, 2, 3, 4]进行乘2的映射就变成了[2, 4, 6, 8]。Reduce是对一组数据进行归约，这个归约的规则由一个函数指定，比如对[1, 2, 3, 4]进行求和的归约得到结果是10，而对它进行求积的归约结果是24。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;关于MapReduce的内容，建议看看孟岩的这篇</span><a title="MapReduce:The free lunch is not over!" href="http://www.mengyan.org/blog/archives/2006/11/15/138.html"><span style="FONT-SIZE: 14pt">MapReduce:The Free Lunch Is Not Over!</span></a><br><br><span style="FONT-SIZE: 14pt">&nbsp;&nbsp;&nbsp;好了，作为这个系列的第一篇就写这么多了，我也是刚开始接触Hadoop，下一篇就是讲Hadoop的部署，谈谈我在部署Hadoop时遇到的问题，也给大家一个参考，少走点弯路。</span><br></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">李立夫</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-03T19:23:42+08:00" pubdate data-updated="true">Mar 3<span>rd</span>, 2014</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/03/03/mysql-install/" title="Previous Post:  linux下关于mySQL的安装和配置 ">&laquo;  linux下关于mySQL的安装和配置 </a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+<p><img src="/images/blogImgs/about.jpg"></p> 
+ <p>A little something about me.</p>
+<p>李立夫，毕业于天津大学软件学院</p>
+<p>热爱开发，曾在firefox实习做系统运维，现于NNIT做系统运维师，有一年实习经验以及一年工作经验</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/hadoop/">Hadoop学习</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/mysql-install/">linux下关于mySQL的安装和配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs2/">Lvs核心ipvs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs/">Lvs简介</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/03/lvs-heartbeat/">使用LVS+Heartbeat配置Linux群集</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - 李立夫 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

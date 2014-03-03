@@ -1,0 +1,4186 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Nagios配置——添加linux主机监控 - Archulate's Blog</title>
+  <meta name="author" content="李立夫">
+
+  
+  <meta name="description" content="一、Nagios简介 　　Nagios是一款开源的电脑系统和网络监视工具，能有效监控Windows、Linux和Unix的主机状态，交换机路由器等网络设置，打印机等。在系统或服务状态异常时发出邮件或短信报警第一时间通知网站运维人员，在状态恢复后发出正常的邮件或短信通知。 　　 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://archulate.github.io/blog/2013/05/22/nagios">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Archulate's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Archulate's Blog</a></h1>
+  
+    <h2>System maintence work blog</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:archulate.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Nagios配置——添加linux主机监控</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-22T19:18:31+08:00" pubdate data-updated="true">May 22<span>nd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!--more-->
+
+
+<p>一、Nagios简介</span></strong></span></p></p>
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172010-1a4517cdb03747cc8d37837d6f550d8a.png"><img style="background-image: none; margin: 6px 0px 0px 19px; padding-left: 0px; padding-right: 0px; display: inline; float: right; padding-top: 0px; border-width: 0px;" title="Nagios logo" src="http://images.cnitblog.com/blog/370046/201301/30172011-56b472de18914a4b90065e303e02e0f0.png" alt="Nagios logo" width="212" height="50" border="0" /></a></p>
+
+
+
+
+<p>　　Nagios是一款开源的电脑系统和网络监视工具，能有效监控Windows、Linux和Unix的主机状态，交换机路由器等网络设置，打印机等。在系统或服务状态异常时发出邮件或短信报警第一时间通知网站运维人员，在状态恢复后发出正常的邮件或短信通知。</p>
+
+
+
+
+<p>　　Nagios原名为NetSaint，由Ethan Galstad开发并维护至今。NAGIOS是一个缩写形式: &#8220;Nagios Ain&#8217;t Gonna Insist On Sainthood&#8221; Sainthood 翻译为圣徒，而&#8221;Agios&#8221;是&#8221;saint&#8221;的希腊表示方法。Nagios被开发在Linux下使用，但在Unix下也工作得非常好。</p>
+
+
+
+
+<p><strong>主要功能</strong></p>
+
+
+
+
+<ul>
+
+<li>网络服务监控（SMTP、POP3、HTTP、NNTP、ICMP、SNMP、FTP、SSH）</li>
+
+<li>主机资源监控（CPU load、disk usage、system logs），也包括Windows主机（使用NSClient++ plugin）</li>
+
+<li>可以指定自己编写的Plugin通过网络收集数据来监控任何情况（温度、警告&hellip;&hellip;）</li>
+
+<li>可以通过配置Nagios远程执行插件远程执行脚本</li>
+
+<li>远程监控支持SSH或SSL加通道方式进行监控</li>
+
+<li>简单的plugin设计允许用户很容易的开发自己需要的检查服务，支持很多开发语言（shell scripts、C++、Perl、ruby、Python、PHP、C#等）</li>
+
+<li>包含很多图形化数据Plugins（Nagiosgraph、Nagiosgrapher、PNP4Nagios等）</li>
+
+<li>可并行服务检查</li>
+
+<li>能够定义网络主机的层次，允许逐级检查，就是从父主机开始向下检查</li>
+
+<li>当服务或主机出现问题时发出通告，可通过email, pager, sms 或任意用户自定义的plugin进行通知</li>
+
+<li>能够自定义事件处理机制重新激活出问题的服务或主机</li>
+
+<li>自动日志循环</li>
+
+<li>支持冗余监控</li>
+
+<li>包括Web界面可以查看当前网络状态，通知，问题历史，日志文件等</li>
+
+</ul>
+
+
+
+
+<p><span style="font-size: 16px;"><strong><span style="color: #800000;">二、Nagios工作原理</span></strong></span></p>
+
+
+
+
+<p>　　Nagios的功能是监控服务和主机，但是他自身并不包括这部分功能，所有的监控、检测功能都是通过各种插件来完成的。</p>
+
+
+
+
+<p>　　启动Nagios后，它会周期性的自动调用插件去检测服务器状态，同时Nagios会维持一个队列，所有插件返回来的状态信息都进入队列，Nagios每次都从队首开始读取信息，并进行处理后，把状态结果通过web显示出来。</p>
+
+
+
+
+<p>　　Nagios提供了许多插件，利用这些插件可以方便的监控很多服务状态。安装完成后，在nagios主目录下的/libexec里放有nagios自带的可以使用的所有插件，如，check_disk是检查磁盘空间的插件，check_load是检查CPU负载的，等等。每一个插件可以通过运行./check_xxx &ndash;h 来查看其使用方法和功能。</p>
+
+
+
+
+<p>　　Nagios可以识别4种状态返回信息，即 0(OK)表示状态正常/绿色、1(WARNING)表示出现警告/黄色、2(CRITICAL)表示出现非常严重的错误/红色、3(UNKNOWN)表示未知错误/深黄色。Nagios根据插件返回来的值，来判断监控对象的状态，并通过web显示出来，以供管理员及时发现故障。</p>
+
+
+
+
+<p><strong>四种监控状态</strong></p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172012-5e48d4a0cbc542b88faf0cdaab257bef.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="2" src="http://images.cnitblog.com/blog/370046/201301/30172016-8d40420c5c50475cb6ee600cd5305716.jpg" alt="2" width="640" height="123" border="0" /></a></p>
+
+
+
+
+<p>　　再说报警功能，如果监控系统发现问题不能报警那就没有意义了，所以报警也是nagios很重要的功能之一。但是，同样的，Nagios 自身也没有报警部分的代码，甚至没有插件，而是交给用户或者其他相关开源项目组去完成的。</p>
+
+
+
+
+<p>　　Nagios 安装，是指基本平台，也就是Nagios软件包的安装。它是监控体系的框架，也是所有监控的基础。</p>
+
+
+
+
+<p>　　打开Nagios官方的文档，会发现Nagios基本上没有什么依赖包，只要求系统是Linux或者其他Nagios支持的系统。不过如果你没有安装apache（http服务），那么你就没有那么直观的界面来查看监控信息了，所以apache姑且算是一个前提条件。关于apache的安装，网上有很多，照着安装就是了。安装之后要检查一下是否可以正常工作。</p>
+
+
+
+
+<p>　　知道Nagios 是如何通过插件来管理服务器对象后，现在开始研究它是如何管理远端服务器对象的。Nagios 系统提供了一个插件NRPE。Nagios 通过周期性的运行它来获得远端服务器的各种状态信息。它们之间的关系如下图所示：</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172017-a0cab434c3184ee48163b3c2f86d0299.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="1" src="http://images.cnitblog.com/blog/370046/201301/30172017-71721df06174482a8b299cb637b7bfcb.jpg" alt="1" width="580" height="435" border="0" /></a></p>
+
+
+
+
+<p><span style="line-height: 1.5;">Nagios 通过NRPE 来远端管理服务</span></p>
+
+
+
+
+<p style="margin-left: 30px;">1. Nagios 执行安装在它里面的check_nrpe 插件，并告诉check_nrpe 去检测哪些服务。</p>
+
+
+
+
+<p style="margin-left: 30px;">2. 通过SSL，check_nrpe 连接远端机子上的NRPE daemon</p>
+
+
+
+
+<p style="margin-left: 30px;">3. NRPE 运行本地的各种插件去检测本地的服务和状态(check_disk,..etc)</p>
+
+
+
+
+<p style="margin-left: 30px;">4. 最后，NRPE 把检测的结果传给主机端的check_nrpe，check_nrpe 再把结果送到Nagios状态队列中。</p>
+
+
+
+
+<p style="margin-left: 30px;">5. Nagios 依次读取队列中的信息，再把结果显示出来。</p>
+
+
+
+
+<p><span style="font-size: 16px;"><strong><span style="color: #800000;">三、实验环境</span></strong></span></p>
+
+
+
+
+<table style="width: 790px;" border="0" cellspacing="0" cellpadding="2">
+
+<tbody>
+
+<tr>
+
+<td valign="top" width="135"><strong>Host Name</strong></td>
+
+<td valign="top" width="199"><strong>OS</strong></td>
+
+<td valign="top" width="112"><strong>IP</strong></td>
+
+<td valign="top" width="342"><strong>Software</strong></td>
+
+</tr>
+
+<tr>
+
+<td valign="top" width="135">Nagios-Server</td>
+
+<td valign="top" width="199">CentOS release 6.3 (Final)</td>
+
+<td valign="top" width="112">192.168.1.108</td>
+
+<td valign="top" width="342">Apache、Php、Nagios、nagios-plugins</td>
+
+</tr>
+
+<tr>
+
+<td valign="top" width="135">Nagios-Linux</td>
+
+<td valign="top" width="199"><span>CentOS release 5.8 (Final)</span></td>
+
+<td valign="top" width="112">192.168.1.111</td>
+
+<td valign="top" width="342"><span>nagios-plugins、nrpe</span></td>
+
+</tr>
+
+<tr>
+
+<td valign="top" width="135">Nagios-Windows</td>
+
+<td valign="top" width="199">Windows XP</td>
+
+<td valign="top" width="112">192.168.1.113&nbsp;</td>
+
+<td valign="top" width="342">NSClient++</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+
+
+
+<p>Server 安装了nagios软件，对监控的数据做处理，并且提供web界面查看和管理。当然也可以对本机自身的信息进行监控。</p>
+
+
+
+
+<p>Client 安装了NRPE等客户端，根据监控机的请求执行监控，然后将结果回传给监控机。</p>
+
+
+
+
+<p>防火墙已关闭/iptables: Firewall is not running.</p>
+
+
+
+
+<p>SELINUX=disabled</p>
+
+
+
+
+<p><span style="font-size: 16px;"><strong><span style="color: #800000;">四、实验目标</span></strong></span></p>
+
+
+
+
+<p><span style="line-height: 1.5;"><img src="http://images.cnitblog.com/blog/370046/201302/20103056-bc6618242a724ddb89ce3d15369e6728.jpg" alt="" /></span></p>
+
+
+
+
+<p><span style="font-size: 16px;"><strong><span style="line-height: 1.5; color: #800000;">五、Nagios服务端安装</span></strong></span></p>
+
+
+
+
+<p><span style="line-height: 1.5;">5.1 基础支持套件：gcc glibc glibc-common gd gd-devel xinetd openssl-devel&nbsp;</span></p>
+
+
+
+
+<p># rpm -q gcc glibc glibc-common gd gd-devel xinetd openssl-devel</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172023-cbd356b06f1c4fb796b99237b3554b2f.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="8" src="http://images.cnitblog.com/blog/370046/201301/30172024-19a493bd6a7a4f8e8dd73d10e2b776dd.jpg" alt="8" width="709" height="130" border="0" /></a></p>
+
+
+
+
+<p>如果系统中没有这些套件，使用yum 安装</p>
+
+
+
+
+<p># yum install -y gcc glibc glibc-common gd gd-devel xinetd openssl-devel</p>
+
+
+
+
+<p>5.2 创建nagios用户和用户组</p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;"># useradd -s /sbin/nologin nagios
+
+# mkdir /usr/local/nagios
+
+# chown -R nagios.nagios /usr/local/nagios</span></pre>
+
+</div>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172026-dd983461e7e24d3fa12c39d213616afc.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="6" src="http://images.cnitblog.com/blog/370046/201301/30172026-726f330b7481428db1fbe2d49a95238c.jpg" alt="6" width="549" height="70" border="0" /></a></p>
+
+
+
+
+<p>查看nagios 目录的权限</p>
+
+
+
+
+<p># ll -d /usr/local/nagios/</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172027-2efbcf5f62f34eae857b7c48c0f94d02.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="7" src="http://images.cnitblog.com/blog/370046/201301/30172028-91c2fce9081d407e9f43a317f76400d0.jpg" alt="7" width="547" height="53" border="0" /></a></p>
+
+
+
+
+<p>5.3 编译安装Nagios</p>
+
+
+
+
+<p># wget <a href="http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-3.4.3.tar.gz">http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-3.4.3.tar.gz</a></p>
+
+
+
+
+<p># tar zxvf nagios-3.4.3.tar.gz</p>
+
+
+
+
+<p># cd nagios</p>
+
+
+
+
+<p># ./configure &#8211;prefix=/usr/local/nagios</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172029-51aac459f3a34106af7db6aaaa403d9e.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="9" src="http://images.cnitblog.com/blog/370046/201301/30172029-53da46cc349f4f378ff4fc513353d040.jpg" alt="9" width="900" height="86" border="0" /></a></p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172030-18fdb7961c474b75a2b033e2a4171519.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="10" src="http://images.cnitblog.com/blog/370046/201301/30172031-fef7fe1f8aa74ee399a5d92a643ad6fa.jpg" alt="10" width="515" height="379" border="0" /></a></p>
+
+
+
+
+<p># make all</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172031-5c6a7463c11d4544bee8f2eed12d7647.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="11" src="http://images.cnitblog.com/blog/370046/201301/30172032-443db8833df0411abb7cd45e2cd84868.jpg" alt="11" width="561" height="463" border="0" /></a></p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172034-ebe3fcafffe94564b8161e6b78fe64c8.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="12" src="http://images.cnitblog.com/blog/370046/201301/30172035-cce0c1098a914074a5074351c24be958.jpg" alt="12" width="561" height="370" border="0" /></a></p>
+
+
+
+
+<p># make install</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172035-b01026f0079c477c815351fb70635f40.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="13" src="http://images.cnitblog.com/blog/370046/201301/30172036-77cffeb39dfc4c1d82128cbfca961f19.jpg" alt="13" width="561" height="239" border="0" /></a></p>
+
+
+
+
+<p># make install-init</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172038-629553af940645d3a1e1b34db39106e7.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="14" src="http://images.cnitblog.com/blog/370046/201301/30172039-f7f0aa8521394d8484a57234f68ea25e.jpg" alt="14" width="640" height="104" border="0" /></a></p>
+
+
+
+
+<p># make install-commandmode</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172039-977a570a3633463e905c54ae6b86b8dc.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="15" src="http://images.cnitblog.com/blog/370046/201301/30172040-1b55dfaa66114e64a7b9ccc3c63983f9.jpg" alt="15" width="609" height="106" border="0" /></a></p>
+
+
+
+
+<p># make install-config</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172042-cdce5169280944e3b61f4df6cc33311d.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="16" src="http://images.cnitblog.com/blog/370046/201301/30172043-24f2e472c68c46119648137b6a76b946.jpg" alt="16" width="900" height="238" border="0" /></a></p>
+
+
+
+
+<p># chkconfig &#8211;add nagios</p>
+
+
+
+
+<p># chkconfig &#8211;level 35 nagios on</p>
+
+
+
+
+<p># chkconfig &#8211;list nagios</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172044-219e4c37980a450c904fb0cb283c73cd.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="17" src="http://images.cnitblog.com/blog/370046/201301/30172044-18a7b53a39cc4111927b7e9426a2abbd.jpg" alt="17" width="570" height="79" border="0" /></a></p>
+
+
+
+
+<p>5.4 验证程序是否被正确安装</p>
+
+
+
+
+<p>切换目录到安装路径（这里是/usr/local/nagios），看是否存在etc、bin、sbin、share、var 这五个目录，如果存在则可以表明程序被正确的安装到系统了。Nagios 各个目录用途说明如下：</p>
+
+
+
+
+<table style="width: 702px;" border="0" cellspacing="0" cellpadding="2">
+
+<tbody>
+
+<tr>
+
+<td valign="top" width="160">bin</td>
+
+<td valign="top" width="540">Nagios 可执行程序所在目录</td>
+
+</tr>
+
+<tr>
+
+<td valign="top" width="160">etc</td>
+
+<td valign="top" width="540">Nagios 配置文件所在目录</td>
+
+</tr>
+
+<tr>
+
+<td valign="top" width="160">sbin</td>
+
+<td valign="top" width="540">Nagios CGI 文件所在目录，也就是执行外部命令所需文件所在的目录</td>
+
+</tr>
+
+<tr>
+
+<td valign="top" width="160">share</td>
+
+<td valign="top" width="540">Nagios网页文件所在的目录</td>
+
+</tr>
+
+<tr>
+
+<td valign="top" width="160">libexec</td>
+
+<td valign="top" width="540">Nagios 外部插件所在目录</td>
+
+</tr>
+
+<tr>
+
+<td valign="top" width="160">var</td>
+
+<td valign="top" width="540">Nagios 日志文件、lock 等文件所在的目录</td>
+
+</tr>
+
+<tr>
+
+<td valign="top" width="160">var/archives</td>
+
+<td valign="top" width="540">Nagios 日志自动归档目录</td>
+
+</tr>
+
+<tr>
+
+<td valign="top" width="160">var/rw</td>
+
+<td valign="top" width="540">用来存放外部命令文件的目录</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+
+
+
+<p>5.5 安装Nagios 插件</p>
+
+
+
+
+<p># wget <a href="http://prdownloads.sourceforge.net/sourceforge/nagiosplug/nagios-plugins-1.4.16.tar.gz">http://prdownloads.sourceforge.net/sourceforge/nagiosplug/nagios-plugins-1.4.16.tar.gz</a></p>
+
+
+
+
+<p># tar zxvf nagios-plugins-1.4.16.tar.gz</p>
+
+
+
+
+<p># cd nagios-plugins-1.4.16</p>
+
+
+
+
+<p># ./configure &#8211;prefix=/usr/local/nagios</p>
+
+
+
+
+<p># make &amp;&amp; make install</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172045-9f33e94cc4034186b2b81b92370fe259.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="18" src="http://images.cnitblog.com/blog/370046/201301/30172046-766b31a9dda24be4a64e8134153d483f.jpg" alt="18" width="900" height="96" border="0" /></a></p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172046-64f935847ba9428d979a2d5c8b0987d2.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="19" src="http://images.cnitblog.com/blog/370046/201301/30172047-007de1f997694c60bdb49299a6ace154.jpg" alt="19" width="568" height="221" border="0" /></a></p>
+
+
+
+
+<p>5.6 安装与配置Apache和Php</p>
+
+
+
+
+<p>Apache 和Php 不是安装nagios 所必须的，但是nagios提供了web监控界面，通过web监控界面可以清晰的看到被监控主机、资源的运行状态，因此，安装一个web服务是很必要的。 <br />需要注意的是，nagios在nagios3.1.x版本以后，配置web监控界面时需要php的支持。这里我们下载的nagios版本为nagios-3.4.3，因此在编译安装完成apache后，还需要编译php模块，这里选取的php版本为php5.4.10。</p>
+
+
+
+
+<p>a. 安装Apache</p>
+
+
+
+
+<p># wget <a title="http://labs.mop.com/apache-mirror//httpd/httpd-2.2.23.tar.gz" href="http://archive.apache.org/dist/httpd/httpd-2.2.23.tar.gz">http://archive.apache.org/dist/httpd/httpd-2.2.23.tar.gz</a></p>
+
+
+
+
+<p># tar zxvf httpd-2.2.23.tar.gz</p>
+
+
+
+
+<p># cd httpd-2.2.23</p>
+
+
+
+
+<p># ./configure &#8211;prefix=/usr/local/apache2</p>
+
+
+
+
+<p># make &amp;&amp; make install</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172048-277b391cdc8a4e7da295d6bf9c3dfe6f.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="22" src="http://images.cnitblog.com/blog/370046/201301/30172049-000f66730e104f96b85ca2ec3000a3a6.jpg" alt="22" width="570" height="377" border="0" /></a></p>
+
+
+
+
+<p>若出现错误：</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/01211923-d930a24ac2e849809cb2b86c78c543d1.jpg" alt="" /></p>
+
+
+
+
+<p>则在<span>编译时入加 &#8211;with-included-apr 即可解决。</span></p>
+
+
+
+
+<p>b. 安装Php</p>
+
+
+
+
+<p># wget <a href="http://cn2.php.net/distributions/php-5.4.10.tar.gz">http://cn2.php.net/distributions/php-5.4.10.tar.gz</a></p>
+
+
+
+
+<p># tar zxvf php-5.4.10.tar.gz </p>
+
+
+
+
+<p># cd php-5.4.10</p>
+
+
+
+
+<p># ./configure &#8211;prefix=/usr/local/php &#8211;with-apxs2=/usr/local/apache2/bin/apxs </p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172050-6bda75716f614a6ab7f2acf8de422062.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="23" src="http://images.cnitblog.com/blog/370046/201301/30172052-37e29eb203e544119dcd267618256daf.jpg" alt="23" width="579" height="342" border="0" /></a></p>
+
+
+
+
+<p># make &amp;&amp; make install</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172054-97af3f5b712041f78d9e44d94ac17bbd.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="24" src="http://images.cnitblog.com/blog/370046/201301/30172056-6b876252535c467e83874bc6ee83eaff.jpg" alt="24" width="900" height="443" border="0" /></a></p>
+
+
+
+
+<p>c. 配置apache <br />找到apache 的配置文件/usr/local/apache2/conf/httpd.conf       <br />找到：       </p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">User daemon 
+
+Group daemon </span></pre>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">修改为&nbsp;</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">User nagios 
+
+Group nagios </span></pre>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">然后找到&nbsp;</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">IfModule </span><span style="color: #ff0000;">dir_module</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"> 
+
+　　DirectoryIndex index.html 
+
+</span><span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">IfModule</span><span style="color: #0000ff;">&gt;</span> </pre>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">修改为&nbsp;</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">IfModule </span><span style="color: #ff0000;">dir_module</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"> 
+
+　　DirectoryIndex index.html index.php 
+
+</span><span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">IfModule</span><span style="color: #0000ff;">&gt;</span> </pre>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">接着增加如下内容：&nbsp;</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre>AddType application/x-httpd-php .php </pre>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">为了安全起见，一般情况下要让nagios 的web 监控页面必须经过授权才能访问，这需要增加验证配置，即在httpd.conf 文件最后添加如下信息：&nbsp;</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">#setting for nagios 
+
+ScriptAlias /nagios/cgi-bin "/usr/local/nagios/sbin" 
+
+</span><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">Directory </span><span style="color: #ff0000;">"/usr/local/nagios/sbin"</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"> 
+
+     AuthType Basic 
+
+     Options ExecCGI 
+
+     AllowOverride None 
+
+     Order allow,deny 
+
+     Allow from all 
+
+     AuthName "Nagios Access" 
+
+     AuthUserFile /usr/local/nagios/etc/htpasswd             //用于此目录访问身份验证的文件 
+
+     Require valid-user 
+
+</span><span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">Directory</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"> 
+
+Alias /nagios "/usr/local/nagios/share" 
+
+</span><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">Directory </span><span style="color: #ff0000;">"/usr/local/nagios/share"</span><span style="color: #0000ff;">&gt;</span><span style="color: #000000;"> 
+
+     AuthType Basic 
+
+     Options None 
+
+     AllowOverride None 
+
+     Order allow,deny 
+
+     Allow from all 
+
+     AuthName "nagios Access" 
+
+     AuthUserFile /usr/local/nagios/etc/htpasswd 
+
+     Require valid-user 
+
+</span><span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">Directory</span><span style="color: #0000ff;">&gt;</span> </pre>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">d. 创建apache目录验证文件&nbsp;</span></p>
+
+
+
+
+<p>在上面的配置中，指定了目录验证文件htpasswd，下面要创建这个文件：</p>
+
+
+
+
+<p># /usr/local/apache2/bin/htpasswd -c /usr/local/nagios/etc/htpasswd david</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172056-36df7ebedd9d448a8b38a2ccd4633ebe.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="25" src="http://images.cnitblog.com/blog/370046/201301/30172057-cbb9c052a34545ccab5420800eaaec3b.jpg" alt="25" width="805" height="78" border="0" /></a> <br />这样就在/usr/local/nagios/etc 目录下创建了一个htpasswd 验证文件，当通过<a href="http://172.16.1.124/nagios/">http://192.168.1.108/nagios/</a> 访问时就需要输入用户名和密码了。       </p>
+
+
+
+
+<p>e. 查看认证文件的内容</p>
+
+
+
+
+<p># cat /usr/local/nagios/etc/htpasswd </p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172058-a256928a00cf40769bc3a5815401732b.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="26" src="http://images.cnitblog.com/blog/370046/201301/30172058-dfc48c3f5bc748819cf91ce007ee2a18.jpg" alt="26" width="520" height="52" border="0" /></a></p>
+
+
+
+
+<p>f. 启动apache 服务      </p>
+
+
+
+
+<p># /usr/local/apache2/bin/apachectl start</p>
+
+
+
+
+<p>到这里nagios 的安装也就基本完成了，你可以通过web来访问了。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/20112657-ad1f78da708c47a5b47f94eae9bbfd91.jpg" alt="" /></p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/20112709-e18bf9ab06ca444188b3722a1aacbc5e.jpg" alt="" width="900" /></p>
+
+
+
+
+<p><span style="font-size: 16px;"><strong><span style="color: #800000;">六、配置Nagios</span></strong></span></p>
+
+
+
+
+<p>Nagios 主要用于监控一台或者多台本地主机及远程的各种信息，包括本机资源及对外的服务等。默认的Nagios 配置没有任何监控内容，仅是一些模板文件。若要让Nagios 提供服务，就必须修改配置文件，增加要监控的主机和服务，下面将详细介绍。</p>
+
+
+
+
+<p>6.1 默认配置文件介绍</p>
+
+
+
+
+<p>Nagios 安装完毕后，默认的配置文件在/usr/local/nagios/etc目录下。</p>
+
+
+
+
+<p><a href="http://images.cnitblog.com/blog/370046/201301/30172103-011c4098757a465fa8e4462f89768c84.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="29" src="http://images.cnitblog.com/blog/370046/201301/30172104-f4ed448295f04f2fa489dddefa6a09bd.jpg" alt="29" width="900" height="135" border="0" /></a></p>
+
+
+
+
+<p>每个文件或目录含义如下表所示：</p>
+
+
+
+
+<table style="width: 812px;" border="0" cellspacing="0" cellpadding="2">
+
+<tbody>
+
+<tr>
+
+<td valign="top" width="200"><strong>文件名或目录名</strong></td>
+
+<td valign="top" width="610"><strong>用途</strong></td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">cgi.cfg</td>
+
+<td valign="top" width="610">控制CGI访问的配置文件</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">nagios.cfg</td>
+
+<td valign="top" width="610">Nagios 主配置文件</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">resource.cfg</td>
+
+<td valign="top" width="610">变量定义文件，又称为资源文件，在些文件中定义变量，以便由其他配置文件引用，如$USER1$</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">objects</td>
+
+<td valign="top" width="610">objects 是一个目录，在此目录下有很多配置文件模板，用于定义Nagios 对象</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">objects/commands.cfg</td>
+
+<td valign="top" width="610">命令定义配置文件，其中定义的命令可以被其他配置文件引用</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">objects/contacts.cfg</td>
+
+<td valign="top" width="610">定义联系人和联系人组的配置文件</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">objects/localhost.cfg</td>
+
+<td valign="top" width="610">定义监控本地主机的配置文件</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">objects/printer.cfg</td>
+
+<td valign="top" width="610">定义监控打印机的一个配置文件模板，默认没有启用此文件</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">objects/switch.cfg</td>
+
+<td valign="top" width="610">定义监控路由器的一个配置文件模板，默认没有启用此文件</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">objects/templates.cfg</td>
+
+<td valign="top" width="610">定义主机和服务的一个模板配置文件，可以在其他配置文件中引用</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">objects/timeperiods.cfg</td>
+
+<td valign="top" width="610">定义Nagios 监控时间段的配置文件</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+<tr>
+
+<td valign="top" width="200">objects/windows.cfg</td>
+
+<td valign="top" width="610">监控Windows 主机的一个配置文件模板，默认没有启用此文件</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   </tbody>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</table>
+
+
+
+
+<p>6.2 配置文件之间的关系</p>
+
+
+
+
+<p>在nagios的配置过程中涉及到的几个定义有：主机、主机组，服务、服务组，联系人、联系人组，监控时间，监控命令等，从这些定义可以看出，nagios各个配置文件之间是互为关联，彼此引用的。   </p>
+
+
+
+
+<p>成功配置出一台nagios监控系统，必须要弄清楚每个配置文件之间依赖与被依赖的关系，最重要的有四点：    </p>
+
+
+
+
+<p style="margin-left: 30px;">第一：定义监控哪些主机、主机组、服务和服务组；    <br />第二：定义这个监控要用什么命令实现；    <br />第三：定义监控的时间段；    <br />第四：定义主机或服务出现问题时要通知的联系人和联系人组。</p>
+
+
+
+
+<p>6.3 配置Nagios</p>
+
+
+
+
+<p><span>&nbsp;为了能更清楚的说明问题，同时也为了维护方便，建议将nagios各个定义对象创建独立的配置文件：</span></p>
+
+
+
+
+<ul>
+
+<li><span>&nbsp;创建hosts.cfg文件来定义主机和主机组</span></li>
+
+<li><span>&nbsp;创建services.cfg文件来定义服务</span></li>
+
+<li><span>&nbsp;用默认的contacts.cfg文件来定义联系人和联系人组</span></li>
+
+<li><span>&nbsp;用默认的commands.cfg文件来定义命令</span></li>
+
+<li><span>&nbsp;用默认的timeperiods.cfg来定义监控时间段</span></li>
+
+<li><span>&nbsp;用默认的templates.cfg文件作为资源引用文件</span></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</ul>
+
+
+
+
+<p>a. templates.cfg文件</p>
+
+
+
+
+<p><span>nagios主要用于监控主机资源以及服务，在nagios配置中称为对象，为了不必重复定义一些监控对象，Nagios引入了一个模板配置文件，将一些共性的属性定义成模板，以便于多次引用。这就是templates.cfg的作用。</span></p>
+
+
+
+
+<p><span>下面详细介绍下templates.cfg文件中每个参数的含义：</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">define contact{
+
+        name                            generic-contact    ; 联系人名称
+
+        service_notification_period     24x7               ; <span>当服务出现异常时，发送通知的时间段，这个时间段"24x7"在timeperiods.cfg文件中定义</span>
+
+        host_notification_period        24x7               ; <span>当主机出现异常时，发送通知的时间段，这个时间段"24x7"在timeperiods.cfg文件中定义</span>
+
+        service_notification_options    w,u,c,r            ; <span>这个定义的是&ldquo;通知可以被发出的情况&rdquo;。w即warn，表示警告状态，u即unknown，表示不明状态;<br />                                                           ; c即criticle，表示紧急状态，r即recover，表示恢复状态;<br />                                                           ; 也就是在服务出现警告状态、未知状态、紧急状态和重新恢复状态时都发送通知给使用者。</span>
+
+        host_notification_options       d,u,r                   ; <span>定义主机在什么状态下需要发送通知给使用者，d即down，表示宕机状态;<br />                                                                ; u即unreachable，表示不可到达状态，r即recovery，表示重新恢复状态。</span>
+
+        service_notification_commands   notify-service-by-email ; <span>服务故障时，发送通知的方式，可以是邮件和短信，这里发送的方式是邮件;<br />                                                                ; 其中&ldquo;notify-service-by-email&rdquo;在commands.cfg文件中定义。</span>
+
+        host_notification_commands      notify-host-by-email    ; <span>主机故障时，发送通知的方式，可以是邮件和短信，这里发送的方式是邮件;<br />                                                                ; 其中&ldquo;notify-host-by-email&rdquo;在commands.cfg文件中定义。 </span>
+
+        register                        0                    ; DONT REGISTER THIS DEFINITION - ITS NOT A REAL CONTACT, JUST A TEMPLATE!
+
+        }
+
+define host{
+
+        name                            generic-host    ; <span>主机名称，这里的主机名，并不是直接对应到真正机器的主机名;<br />                                                        ; 乃是对应到在主机配置文件里所设定的主机名。</span>
+
+        notifications_enabled           1               ; Host notifications are enabled
+
+        event_handler_enabled           1               ; Host event handler is enabled
+
+        flap_detection_enabled          1               ; Flap detection is enabled
+
+        failure_prediction_enabled      1               ; Failure prediction is enabled
+
+        process_perf_data               1               ; 其值可以为0或1，其作用为是否启用Nagios的数据输出功能;<br />                                                        ; 如果将此项赋值为1，那么Nagios就会将收集的数据写入某个文件中，以备提取。
+
+        retain_status_information       1               ; Retain status information across program restarts
+
+        retain_nonstatus_information    1               ; Retain non-status information across program restarts
+
+        notification_period             24x7            ; <span>指定&ldquo;发送通知&rdquo;的时间段，也就是可以在什么时候发送通知给使用者。</span>
+
+        register                        0               ; DONT REGISTER THIS DEFINITION - ITS NOT A REAL HOST, JUST A TEMPLATE!
+
+        }
+
+define host{
+
+        name                            linux-server    ; <span>主机名称</span>
+
+        use                             generic-host    ; <span>use表示引用，也就是将主机generic-host的所有属性引用到linux-server中来;<br />                                                        ; 在nagios配置中，很多情况下会用到引用。</span>
+
+        check_period                    24x7            ; <span>这里的check_period告诉nagios检查主机的时间段</span>
+
+        check_interval                  5               ; <span>nagios对主机的检查时间间隔，这里是5分钟。</span>
+
+        retry_interval                  1               ; <span>重试检查时间间隔，单位是分钟。</span>
+
+        max_check_attempts              10              ; <span>nagios对主机的最大检查次数，也就是nagios在检查发现某主机异常时，并不马上判断为异常状况;<br />                                                        ; 而是多试几次，因为有可能只是一时网络太拥挤，或是一些其他原因，让主机受到了一点影响;<br />                                                        ; 这里的10就是最多试10次的意思。</span>
+
+        check_command                   check-host-alive ; <span>指定检查主机状态的命令，其中&ldquo;check-host-alive&rdquo;在commands.cfg文件中定义。</span>
+
+        notification_period             24x7            ; <span>主机故障时，发送通知的时间范围，其中&ldquo;workhours&rdquo;在timeperiods.cfg中进行了定义;<br />                                                        ; 下面会陆续讲到。</span>
+
+        notification_interval           10              ; <span>在主机出现异常后，故障一直没有解决，nagios再次对使用者发出通知的时间。单位是分钟;<br />                                                        ; 如果你觉得，所有的事件只需要一次通知就够了，可以把这里的选项设为0</span>
+
+        notification_options            d,u,r           ; <span>定义主机在什么状态下可以发送通知给使用者，d即down，表示宕机状态;<br />                                                        ; u即unreachable，表示不可到达状态;<br />                                                        ; r即recovery，表示重新恢复状态。</span>
+
+        contact_groups                  ts              ; <span>指定联系人组，这个&ldquo;admins&rdquo;在contacts.cfg文件中定义。</span>
+
+        register                        0               ; DONT REGISTER THIS DEFINITION - ITS NOT A REAL HOST, JUST A TEMPLATE!
+
+        }
+
+define host{
+
+        name                    windows-server  ; The name of this host template
+
+        use                     generic-host    ; Inherit default values from the generic-host template
+
+        check_period            24x7            ; By default, Windows servers are monitored round the clock
+
+        check_interval          5               ; Actively check the server every 5 minutes
+
+        retry_interval          1               ; Schedule host check retries at 1 minute intervals
+
+        max_check_attempts      10              ; Check each server 10 times (max)
+
+        check_command           check-host-alive        ; Default command to check if servers are "alive"
+
+        notification_period     24x7            ; Send notification out at any time - day or night
+
+        notification_interval   10              ; Resend notifications every 30 minutes
+
+        notification_options    d,r             ; Only send notifications for specific host states
+
+        contact_groups          ts              ; Notifications get sent to the admins by default
+
+        hostgroups              windows-servers ; Host groups that Windows servers should be a member of
+
+        register                0               ; DONT REGISTER THIS - ITS JUST A TEMPLATE
+
+        }
+
+define service{
+
+        name                            generic-service         ; <span>定义一个服务名称</span>
+
+        active_checks_enabled           1                       ; Active service checks are enabled
+
+        passive_checks_enabled          1                       ; Passive service checks are enabled/accepted
+
+        parallelize_check               1                       ; Active service checks should be parallelized;<br />                                                                ; (disabling this can lead to major performance problems)
+
+        obsess_over_service             1                       ; We should obsess over this service (if necessary)
+
+        check_freshness                 0                       ; Default is to NOT check service 'freshness'
+
+        notifications_enabled           1                       ; Service notifications are enabled
+
+        event_handler_enabled           1                       ; Service event handler is enabled
+
+        flap_detection_enabled          1                       ; Flap detection is enabled
+
+        failure_prediction_enabled      1                       ; Failure prediction is enabled
+
+        process_perf_data               1                       ; Process performance data
+
+        retain_status_information       1                       ; Retain status information across program restarts
+
+        retain_nonstatus_information    1                       ; Retain non-status information across program restarts
+
+        is_volatile                     0                       ; The service is not volatile
+
+        check_period                    24x7             ; <span>这里的check_period告诉nagios检查服务的时间段。</span>
+
+        max_check_attempts              3                ; <span>nagios对服务的最大检查次数。</span>
+
+        normal_check_interval           5                ; <span>此选项是用来设置服务检查时间间隔，也就是说，nagios这一次检查和下一次检查之间所隔的时间;<br />                                                         ; 这里是5分钟。</span>
+
+        retry_check_interval            2                ; <span>重试检查时间间隔，单位是分钟。</span>
+
+        contact_groups                  ts           ; <span>指定联系人组</span>
+
+        notification_options            w,u,c,r          ; <span>这个定义的是&ldquo;通知可以被发出的情况&rdquo;。w即warn，表示警告状态;<br />                                                         ; u即unknown，表示不明状态;<br />                                                         ; c即criticle，表示紧急状态，r即recover，表示恢复状态;<br />                                                         ; 也就是在服务出现警告状态、未知状态、紧急状态和重新恢复后都发送通知给使用者。</span>
+
+        notification_interval           10               ; Re-notify about service problems every hour
+
+        notification_period             24x7             ; <span>指定&ldquo;发送通知&rdquo;的时间段，也就是可以在什么时候发送通知给使用者。</span>
+
+        register                        0                ; DONT REGISTER THIS DEFINITION - ITS NOT A REAL SERVICE, JUST A TEMPLATE!
+
+        }
+
+define service{
+
+        name                            local-service           ; The name of this service template
+
+        use                             generic-service         ; Inherit default values from the generic-service definition
+
+        max_check_attempts              4             ; Re-check the service up to 4 times in order to determine its final (hard) state
+
+        normal_check_interval           5             ; Check the service every 5 minutes under normal conditions
+
+        retry_check_interval            1             ; Re-check the service every minute until a hard state can be determined
+
+        register                        0             ; DONT REGISTER THIS DEFINITION - ITS NOT A REAL SERVICE, JUST A TEMPLATE!
+
+        }</span></pre>
+
+</div>
+
+
+
+
+<p>b.&nbsp;<span>resource.cfg文件</span></p>
+
+
+
+
+<p><span>resource.cfg是nagios的变量定义文件，文件内容只有一行：</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre>$USER1$=/usr/local/nagios/libexec</pre>
+
+</div>
+
+
+
+
+<p>其中，变量$USER1$指定了安装nagios插件的路径，如果把插件安装在了其它路径，只需在这里进行修改即可。需要注意的是，变量必须先定义，然后才能在其它配置文件中进行引用。</p>
+
+
+
+
+<p>c. commands.cfg文件</p>
+
+
+
+
+<p><span>此文件默认是存在的，无需修改即可使用，当然如果有新的命令需要加入时，在此文件进行添加即可。</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;"><span>#notify-host-by-email命令的定义 </span><br />define command{
+
+        command_name    notify-host-by-email             <span>#命令名称，即定义了一个主机异常时发送邮件的命令。</span>
+
+        command_line    /usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\nHost: $HOSTNAME$\nState: $HOSTSTATE$\nAddress: $HOSTADDRESS$\nInfo: $HOSTOUTPUT$\n\nDate/Time: $LONGDATETIME$\n" | /bin/mail -s "** $NOTIFICATIONTYPE$ Host Alert: $HOSTNAME$ is $HOSTSTATE$ **" $CONTACTEMAIL$                                     <span>#命令具体的执行方式。</span>
+
+        }
+
+<span>#notify-service-by-email命令的定义 </span><br />define command{
+
+        command_name    notify-service-by-email          <span>#命令名称，即定义了一个服务异常时发送邮件的命令</span>
+
+        command_line    /usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $LONGDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$\n" | /bin/mail -s "** $NOTIFICATIONTYPE$ Service Alert: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$
+
+        }<br />#check-host-alive命令的定义
+
+define command{
+
+        command_name    check-host-alive                 #<span>命令名称，用来检测主机状态。</span>
+
+        command_line    $USER1$/check_ping -H $HOSTADDRESS$ -w 3000.0,80% -c 5000.0,100% -p 5             <br />                        # <span>这里的变量$USER1$在resource.cfg文件中进行定义，即$USER1$=/usr/local/nagios/libexec;<br /></span><span style="line-height: 1.5;">                        # 那么check_ping的完整路径为/usr/local/nagios/libexec/check_ping;<br />                        #&nbsp;&ldquo;-w&nbsp;3000.0,80%&rdquo;中&ldquo;-w&rdquo;说明后面的一对值对应的是&ldquo;WARNING&rdquo;状态，&ldquo;80%&rdquo;是其临界值。<br />                        # &ldquo;-c&nbsp;5000.0,100%&rdquo;中&ldquo;-c&rdquo;说明后面的一对值对应的是&ldquo;CRITICAL&rdquo;，&ldquo;100%&rdquo;是其临界值。<br />                        # &ldquo;-p&nbsp;1&rdquo;说明每次探测发送一个包。</span><span><br /></span>        }
+
+define command{
+
+        command_name    check_local_disk
+
+        command_line    $USER1$/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$            <span>#$ARG1$是指在调用这个命令的时候，命令后面的第一个参数。</span>
+
+        }
+
+define command{
+
+        command_name    check_local_load
+
+        command_line    $USER1$/check_load -w $ARG1$ -c $ARG2$
+
+        }
+
+define command{
+
+        command_name    check_local_procs
+
+        command_line    $USER1$/check_procs -w $ARG1$ -c $ARG2$ -s $ARG3$
+
+        }
+
+define command{
+
+        command_name    check_local_users
+
+        command_line    $USER1$/check_users -w $ARG1$ -c $ARG2$
+
+        }
+
+define command{
+
+        command_name    check_local_swap
+
+        command_line    $USER1$/check_swap -w $ARG1$ -c $ARG2$
+
+        }
+
+define command{
+
+        command_name    check_ftp
+
+        command_line    $USER1$/check_ftp -H $HOSTADDRESS$ $ARG1$
+
+        }
+
+define command{
+
+        command_name    check_http
+
+        command_line    $USER1$/check_http -I $HOSTADDRESS$ $ARG1$
+
+        }
+
+define command{
+
+        command_name    check_ssh
+
+        command_line    $USER1$/check_ssh $ARG1$ $HOSTADDRESS$
+
+        }
+
+define command{
+
+        command_name    check_ping
+
+        command_line    $USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5
+
+        }
+
+define command{
+
+        command_name    check_nt
+
+        command_line    $USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -v $ARG1$ $ARG2$
+
+        }<br /></span></pre>
+
+</div>
+
+
+
+
+<p>d.&nbsp;<span>hosts.cfg文件</span></p>
+
+
+
+
+<p><span>此文件默认不存在，需要手动创建，hosts.cfg主要用来指定被监控的主机地址以及相关属性信息，根据实验目标配置如下：</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">define host{   
+
+        use                     linux-server          <span>#引用主机linux-server的属性信息，linux-server主机在templates.cfg文件中进行了定义。</span>
+
+        host_name               Nagios-Linux          <span>#主机名</span>
+
+        alias                   Nagios-Linux          <span>#主机别名</span>
+
+        address                 192.168.1.111         <span>#被监控的主机地址，这个地址可以是ip，也可以是域名。</span>
+
+        }  </span> </pre>
+
+<pre><span style="color: #000000;"><span>#定义一个主机组</span>   
+
+define hostgroup{      
+
+        hostgroup_name          bsmart-servers        <span>#主机组名称，可以随意指定。</span>
+
+        alias                   bsmart servers        <span>#主机组别名</span>
+
+        members                 Nagios-Linux          <span>#主机组成员，其中&ldquo;Nagios-Linux&rdquo;就是上面定义的主机。</span>     <br />        }</span></pre>
+
+</div>
+
+
+
+
+<p><strong>注意：</strong>在/usr/local/nagios/etc/<span>objects 下默认有localhost.cfg 和windows.cfg 这两个配置文件，localhost.cfg 文件是定义监控主机本身的，windows.cfg 文件是定义windows 主机的，其中包括了对host 和相关services 的定义。所以在本次实验中，将直接在localhost.cfg 中定义监控主机（Nagios-Server），在windows.cfg中定义windows 主机（Nagios-Windows）。根据自己的需要修改其中的相关配置，详细如下：</span></p>
+
+
+
+
+<p><span>localhost.cfg</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">define host{
+
+        use                     linux-server            ; Name of host template to use
+
+                                                        ; This host definition will inherit all variables that are defined
+
+                                                        ; in (or inherited by) the linux-server host template definition.
+
+        host_name               Nagios-Server
+
+        alias                   Nagios-Server
+
+        address                 127.0.0.1
+
+        }
+
+define hostgroup{
+
+        hostgroup_name  linux-servers ; The name of the hostgroup
+
+        alias           Linux Servers ; Long name of the group
+
+        members         Nagios-Server ; Comma separated list of hosts that belong to this group
+
+        }
+
+define service{
+
+        use                             local-service         ; Name of service template to use
+
+        host_name                       Nagios-Server
+
+        service_description             PING
+
+        check_command                   check_ping!100.0,20%!500.0,60%
+
+        }
+
+define service{
+
+        use                             local-service         ; Name of service template to use
+
+        host_name                       Nagios-Server
+
+        service_description             Root Partition
+
+        check_command                   check_local_disk!20%!10%!/
+
+        }
+
+define service{
+
+        use                             local-service         ; Name of service template to use
+
+        host_name                       Nagios-Server
+
+        service_description             Current Users
+
+        check_command                   check_local_users!20!50
+
+        }
+
+define service{
+
+        use                             local-service         ; Name of service template to use
+
+        host_name                       Nagios-Server
+
+        service_description             Total Processes
+
+        check_command                   check_local_procs!250!400!RSZDT
+
+        }
+
+define service{
+
+        use                             local-service         ; Name of service template to use
+
+        host_name                       Nagios-Server
+
+        service_description             Current Load
+
+        check_command                   check_local_load!5.0,4.0,3.0!10.0,6.0,4.0
+
+        }
+
+define service{
+
+        use                             local-service         ; Name of service template to use
+
+        host_name                       Nagios-Server
+
+        service_description             Swap Usage
+
+        check_command                   check_local_swap!20!10
+
+        }
+
+define service{
+
+        use                             local-service         ; Name of service template to use
+
+        host_name                       Nagios-Server
+
+        service_description             SSH
+
+        check_command                   check_ssh
+
+        notifications_enabled           0
+
+        }
+
+define service{
+
+        use                             local-service         ; Name of service template to use
+
+        host_name                       Nagios-Server
+
+        service_description             HTTP
+
+        check_command                   check_http
+
+        notifications_enabled           0
+
+        }</span></pre>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">windows.cfg</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">define host{
+
+        use             windows-server  ; Inherit default values from a template
+
+        host_name       Nagios-Windows  ; The name we're giving to this host
+
+        alias           My Windows Server       ; A longer name associated with the host
+
+        address         192.168.1.113   ; IP address of the host
+
+        }
+
+define hostgroup{
+
+        hostgroup_name  windows-servers ; The name of the hostgroup
+
+        alias           Windows Servers ; Long name of the group
+
+        }
+
+define service{
+
+        use                     generic-service
+
+        host_name               Nagios-Windows
+
+        service_description     NSClient++ Version
+
+        check_command           check_nt!CLIENTVERSION
+
+        }
+
+define service{
+
+        use                     generic-service
+
+        host_name               Nagios-Windows
+
+        service_description     Uptime
+
+        check_command           check_nt!UPTIME
+
+        }
+
+define service{
+
+        use                     generic-service
+
+        host_name               Nagios-Windows
+
+        service_description     CPU Load
+
+        check_command           check_nt!CPULOAD!-l 5,80,90
+
+        }
+
+define service{
+
+        use                     generic-service
+
+        host_name               Nagios-Windows
+
+        service_description     Memory Usage
+
+        check_command           check_nt!MEMUSE!-w 80 -c 90
+
+        }
+
+define service{
+
+        use                     generic-service
+
+        host_name               Nagios-Windows
+
+        service_description     C:\ Drive Space
+
+        check_command           check_nt!USEDDISKSPACE!-l c -w 80 -c 90
+
+        }
+
+define service{
+
+        use                     generic-service
+
+        host_name               Nagios-Windows
+
+        service_description     W3SVC
+
+        check_command           check_nt!SERVICESTATE!-d SHOWALL -l W3SVC
+
+        }
+
+define service{
+
+        use                     generic-service
+
+        host_name               Nagios-Windows
+
+        service_description     Explorer
+
+        check_command           check_nt!PROCSTATE!-d SHOWALL -l Explorer.exe
+
+        }</span></pre>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">e.&nbsp;</span><span style="line-height: 1.5;">services.cfg文件</span></p>
+
+
+
+
+<p><span>此文件默认也不存在，需要手动创建，services.cfg文件主要用于定义监控的服务和主机资源，例如监控http服务、ftp服务、主机磁盘空间、主机系统负载等等。Nagios-Server 和Nagios-Windows 相关服务已在相应的配置文件中定义，所以这里只需要定义Nagios-Linux 相关服务即可，这里只定义一个检测是否存活的服务来验证配置文件的正确性，其他服务的定义将在后面讲到。</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">define service{  
+
+        use                     local-service          <span>#引用local-service服务的属性值，local-service在templates.cfg文件中进行了定义。</span>
+
+        host_name               Nagios-Linux           #<span>指定要监控哪个主机上的服务，&ldquo;Nagios-Server&rdquo;在hosts.cfg文件中进行了定义。</span>
+
+        service_description     check-host-alive       <span>#对监控服务内容的描述，以供维护人员参考。</span>
+
+        check_command           check-host-alive       <span>#指定检查的命令。<br /></span>        }  <br /></span></pre>
+
+</div>
+
+
+
+
+<p>f.&nbsp;contacts.cfg文件</p>
+
+
+
+
+<p>contacts.cfg是一个定义联系人和联系人组的配置文件，当监控的主机或者服务出现故障，nagios会通过指定的通知方式（邮件或者短信）将信息发给这里指定的联系人或者使用者。</p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span>define contact{
+
+        contact_name                    David             #联系人的名称,这个地方不要有空格
+
+        <span>use&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generic-contact   <span>#引用generic-contact的属性信息，其中&ldquo;generic-contact&rdquo;在templates.cfg文件中进行定义</span></span>
+
+        alias &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Nagios Admin
+
+        email                           david.tang@bsmart.cn
+
+        }<br /></span></pre>
+
+<pre>define contactgroup{
+
+        contactgroup_name       ts                              #联系人组的名称,同样不能空格
+
+        alias                   Technical Support               #<span>联系人组描述</span>
+
+        members                 David                           #联系人组成员，<span>其中&ldquo;david&rdquo;就是上面定义的联系人，</span>如果有多个联系人则以逗号相隔
+
+        }</pre>
+
+</div>
+
+
+
+
+<p>g.&nbsp;timeperiods.cfg文件</p>
+
+
+
+
+<p><span>此文件只要用于定义监控的时间段，下面是一个配置好的实例：</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span>#下面是定义一个名为24x7的时间段，即监控所有时间段  
+
+define timeperiod{  
+
+        timeperiod_name 24x7       #时间段的名称<span lang="EN-US">,</span>这个地方不要有空格
+
+        alias           24 Hours A Day, 7 Days A Week  
+
+        sunday          00:00-24:00  
+
+        monday          00:00-24:00  
+
+        tuesday         00:00-24:00  
+
+        wednesday       00:00-24:00  
+
+        thursday        00:00-24:00  
+
+        friday          00:00-24:00  
+
+        saturday        00:00-24:00  
+
+        }  
+
+#下面是定义一个名为workhours的时间段，即工作时间段。  
+
+define timeperiod{  
+
+        timeperiod_name workhours   
+
+        alias           Normal Work Hours  
+
+        monday          09:00-17:00  
+
+        tuesday         09:00-17:00  
+
+        wednesday       09:00-17:00  
+
+        thursday        09:00-17:00  
+
+        friday          09:00-17:00  
+
+        }  </span></pre>
+
+</div>
+
+
+
+
+<p>h.&nbsp;cgi.cfg文件</p>
+
+
+
+
+<p>此文件用来控制相关cgi脚本，如果想在nagios的web监控界面执行cgi脚本，例如重启nagios进程、关闭nagios通知、停止nagios主机检测等，这时就需要配置cgi.cfg文件了。<br />由于nagios的web监控界面验证用户为david，所以只需在cgi.cfg文件中添加此用户的执行权限就可以了，需要修改的配置信息如下：</p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span>default_user_name=david
+
+authorized_for_system_information=nagiosadmin,david  
+
+authorized_for_configuration_information=nagiosadmin,david  
+
+authorized_for_system_commands=david
+
+authorized_for_all_services=nagiosadmin,david  
+
+authorized_for_all_hosts=nagiosadmin,david
+
+authorized_for_all_service_commands=nagiosadmin,david  
+
+authorized_for_all_host_commands=nagiosadmin,david</span>&nbsp;</pre>
+
+</div>
+
+
+
+
+<p>i. nagios.cfg文件</p>
+
+
+
+
+<p><span>nagios.cfg默认的路径为/usr/local/nagios/etc/nagios.cfg，是nagios的核心配置文件，所有的对象配置文件都必须在这个文件中进行定义才能发挥其作用，这里只需将对象配置文件在Nagios.cfg文件中进行引用即可。</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">log_file=/usr/local/nagios/var/nagios.log                  # <span>定义nagios日志文件的路径</span>
+
+cfg_file=/usr/local/nagios/etc/objects/commands.cfg        # <span>&ldquo;cfg_file&rdquo;变量用来引用对象配置文件，如果有更多的对象配置文件，在这里依次添加即可。</span><br />cfg_file=/usr/local/nagios/etc/objects/contacts.cfg<br />cfg_file=/usr/local/nagios/etc/objects/hosts.cfg<br /><span class="attribute">cfg_file</span><span>=/usr/local/nagios/etc/objects/services.cfg</span><br />cfg_file=/usr/local/nagios/etc/objects/timeperiods.cfg
+
+cfg_file=/usr/local/nagios/etc/objects/templates.cfg<br />cfg_file=/usr/local/nagios/etc/objects/localhost.cfg       # 本机配置文件<br />cfg_file=/usr/local/nagios/etc/objects/windows.cfg         # windows 主机配置文件
+
+object_cache_file=/usr/local/nagios/var/objects.cache      # <span>该变量用于指定一个&ldquo;所有对象配置文件&rdquo;的副本文件，或者叫对象缓冲文件</span>
+
+precached_object_file=/usr/local/nagios/var/objects.precache<br />resource_file=/usr/local/nagios/etc/resource.cfg           # <span>该变量用于指定nagios资源文件的路径，可以在nagios.cfg中定义多个资源文件。</span>
+
+status_file=/usr/local/nagios/var/status.dat               # <span>该变量用于定义一个状态文件，此文件用于保存nagios的当前状态、注释和宕机信息等。</span>
+
+status_update_interval=10                                  # <span>该变量用于定义状态文件（即status.dat）的更新时间间隔，单位是秒，最小更新间隔是1秒。</span>
+
+nagios_user=nagios                                         # <span>该变量指定了Nagios进程使用哪个用户运行。</span><br />nagios_group=nagios                                        # <span>该变量用于指定Nagios使用哪个用户组运行。</span>
+
+check_external_commands=1                                  # <span>该变量用于设置是否允许nagios在web监控界面运行cgi命令;<br />                                                           # 也就是是否允许nagios在web界面下执行重启nagios、停止主机/服务检查等操作;<br />                                                           # &ldquo;1&rdquo;为运行，&ldquo;0&rdquo;为不允许。</span>
+
+command_check_interval=10s                                 # <span>该变量用于设置nagios对外部命令检测的时间间隔，如果指定了一个数字加一个"s"(如10s);<br />                                                           # 那么外部检测命令的间隔是这个数值以秒为单位的时间间隔;<br />                                                           # 如果没有用"s"，那么外部检测命令的间隔是以这个数值的&ldquo;时间单位&rdquo;的时间间隔。</span><br />interval_length=60                                         # <span>该变量指定了nagios的时间单位，默认值是60秒，也就是1分钟;<br />                                                           # 即在nagios配置中所有的时间单位都是分钟。</span><br /></span></pre>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">6.4&nbsp;验证Nagios 配置文件的正确性</span></p>
+
+
+
+
+<div>
+
+<p>Nagios 在验证配置文件方面做的非常到位，只需通过一个命令即可完成：</p>
+
+<div class="cnblogs_code">
+
+<pre># /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg</pre>
+
+</div>
+
+<div><img style="line-height: 1.5;" src="http://images.cnitblog.com/blog/370046/201302/02004004-c834a48a08f84242b8b762d16f41e548.jpg" alt="" /></div>
+
+<div>&nbsp;</div>
+
+<div><span style="line-height: 1.5;">Nagios提供的这个验证功能非常有用，在错误信息中通常会打印出错误的配置文件以及文件中的哪一行，这使得nagios的配置变得非常容易，报警信息通常是可以忽略的，因为一般那些只是建议性的。</span>&nbsp;</div>
+
+<p>看到上面这些信息就说明没问题了，然后启动Nagios 服务。</p>
+
+<div><span style="font-size: 16px;"><strong><span style="line-height: 1.5; color: #800000;">七、Nagios的启动与停止</span></strong></span></div>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">7.1 启动Nagios</span></p>
+
+
+
+
+<p><span style="line-height: 1.5;">a.&nbsp;<span>通过初始化脚本启动nagios</span></span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre># /etc/init.d/nagios start<br />or<br /># service nagios start</pre>
+
+</div>
+
+
+
+
+<p><span style="line-height: 1.5;">b.&nbsp;手工方式启动nagios</span></p>
+
+
+
+
+<div>通过nagios命令的&ldquo;-d&rdquo;参数来启动nagios守护进程：</div>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre># /usr/local/nagios/bin/nagios -d /usr/local/nagios/etc/nagios.cfg</pre>
+
+</div>
+
+
+
+
+<p>7.2 重启Nagios</p>
+
+
+
+
+<p>当修改了配置文件让其生效时，需要重启/重载Nagios服务。</p>
+
+
+
+
+<p>a.&nbsp;<span>通过初始化脚本来重启nagios</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre># /etc/init.d/nagios reload<br />or<br /># /etc/init.d/nagios restart<br />or<br /># service nagios restart</pre>
+
+</div>
+
+
+
+
+<p>b.&nbsp;<span>通过web监控页重启nagios</span></p>
+
+
+
+
+<p>可以通过web监控页的<span>&nbsp;&#8220;Process Info&#8221; -&gt;&nbsp;<span>&#8220;Restart the Nagios process&#8221;来重启nagios</span></span></p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/20112749-13e1fda275164e36bf5f07122d6f6e01.jpg" alt="" /></p>
+
+
+
+
+<p><span><span>c.&nbsp;<span>手工方式平滑重启</span></span></span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre># kill -HUP <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">nagios_pid</span><span style="color: #0000ff;">&gt;</span></pre>
+
+</div>
+
+
+
+
+<p>7.3 停止Nagios</p>
+
+
+
+
+<p>a.&nbsp;<span>通过初始化脚本关闭nagios服务</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre># /etc/init.d/nagios stop<br />or<br /># service nagios stop</pre>
+
+</div>
+
+
+
+
+<p>b.&nbsp;<span>通过web监控页停止nagios</span></p>
+
+
+
+
+<p>可以通过web监控页的&nbsp;&#8220;Process Info&#8221; -&gt;&nbsp;&#8221;<span>Shutdown the Nagios process</span>&#8220;来停止nagios</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/20112806-c004f67d89cf441d9ef169804c1b7001.jpg" alt="" /></p>
+
+
+
+
+<p>c. 手工方式停止Nagios</p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre># kill <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">nagios_pid</span><span style="color: #0000ff;">&gt;</span></pre>
+
+</div>
+
+
+
+
+<p><span style="font-size: 16px;"><strong><span style="line-height: 1.5; color: #800000;">八、查看初步配置情况</span></strong></span></p>
+
+
+
+
+<p><span style="line-height: 1.5;">8.1 启动完成之后，登录Nagios Web监控页<a href="http://172.16.1.124/nagios/">http://192.168.1.108/nagios/</a>&nbsp;查看相关信息。</span></p>
+
+
+
+
+<p><span style="line-height: 1.5;">8.2 点击左面的Current Status -&gt;&nbsp;Hosts 可以看到所定义的三台主机已经全部UP了。</span></p>
+
+
+
+
+<p><span style="line-height: 1.5;"><img src="http://images.cnitblog.com/blog/370046/201302/02005854-29934656840c46fe816b70d8fd0d7f77.jpg" alt="" width="900" /></span></p>
+
+
+
+
+<p><span style="line-height: 1.5;">8.3 点击Current Status -&gt; Services 查看服务监控情况。</span></p>
+
+
+
+
+<p><span style="line-height: 1.5;"><img src="http://images.cnitblog.com/blog/370046/201302/02010233-d29305e56b68490a86216772bbe477dc.jpg" alt="" width="900" /></span></p>
+
+
+
+
+<p><span style="line-height: 1.5;">看到Nagios-Linux和Nagios-Server的服务状态已经OK了，但是Nagios-Windows的服务状态为CRITICAL，Status Information 提示Connection refused。因为Nagios-Windows上还未安装插件，内部服务还无法查看，所以出现这种情况。将在下面具体讲解。</span></p>
+
+
+
+
+<p><span style="font-size: 16px;"><strong><span style="line-height: 1.5; color: #800000;">九、利用NRPE监控远程Linux上的&ldquo;本地信息&rdquo;</span></strong></span></p>
+
+
+
+
+<p><span>上面已经对远程Linux 主机是否存活做了监控，而判断远程机器是否存活，我们可以使用ping 工具对其监测。还有一些远程主机服务，例如ftp、ssh、http，都是对外开放的服务，<span>即使不用N</span><span lang="EN-US">agios，</span><span>我们也可以试的出来，</span><span>随便找一台机器看能不能访问这些服务就行了。</span>但是对于像磁盘容量，</span><span lang="EN-US">cpu</span><span>负载这样的&ldquo;</span><span>本地信息&rdquo;</span><span lang="EN-US">，Nagios</span><span>只能监测自己所在的主机，</span><span>而对其他的机器则显得有点无能为力。</span><span>毕竟没得到被控主机的适当权限是不可能得到这些信息的。</span><span>为了解决这个问题，</span><span lang="EN-US">nagios</span><span>有这样一个附加组件&#8211;&ldquo;</span><span lang="EN-US">NRPE&rdquo;，</span><span>用它就可以完成对L</span><span lang="EN-US">inux&nbsp;</span><span>类型主机&#8221;</span><span>本地信息</span><span lang="EN-US">&rdquo;</span><span>的监控。</span></p>
+
+
+
+
+<p><span>9.1 NRPE 工作原理</span></p>
+
+
+
+
+<p><span><a href="http://images.cnitblog.com/blog/370046/201301/30172018-ee257c664e12472590da4a3b503be33e.png"><img title="nrpe" src="http://images.cnitblog.com/blog/370046/201301/30172019-7263dc2d9c9a40dbaa158ed0969e06d4.png" alt="nrpe" width="483" height="145" border="0" /></a></span></p>
+
+
+
+
+<div align="left">NRPE&nbsp;总共由两部分组成：</div>
+
+
+
+
+<ul>
+
+<li>check_nrpe&nbsp;插件，位于监控主机上</li>
+
+<li>NRPE daemon，运行在远程的Linux主机上(通常就是被监控机)</li>
+
+</ul>
+
+
+
+
+<div align="left">
+
+<p>按照上图，整个的监控过程如下：</p>
+
+<p>当Nagios 需要监控某个远程Linux 主机的服务或者资源情况时：</p>
+
+<ol>
+
+<li>Nagios 会运行check_nrpe 这个插件，告诉它要检查什么；</li>
+
+<li>check_nrpe 插件会连接到远程的NRPE daemon，所用的方式是SSL；</li>
+
+<li>NRPE daemon 会运行相应的Nagios 插件来执行检查；</li>
+
+<li>NRPE daemon 将检查的结果返回给check_nrpe 插件，插件将其递交给nagios做处理。</li>
+
+</ol>
+
+<p>注意：NRPE daemon 需要Nagios 插件安装在远程的Linux主机上，否则，daemon不能做任何的监控。</p>
+
+<p>9.2 在被监控机（Nagios-Linux）上</p>
+
+<p>a. 增加用户&amp;设定密码</p>
+
+<p># useradd nagios</p>
+
+<p># passwd nagios</p>
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02152147-18517f8d25c5418c867ea6c95cb39d60.jpg" alt="" /></p>
+
+<p>b. 安装Nagios 插件</p>
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;"># tar zxvf nagios-plugins-1.4.16.tar.gz
+
+# cd nagios-plugins-1.4.16
+
+# ./configure --prefix=/usr/local/nagios
+
+# make &amp;&amp; make install</span></pre>
+
+</div>
+
+<p><span>这一步完成后会在</span><span lang="EN-US">/usr/local/nagios/</span><span>下生成三个目录include、</span><span lang="EN-US">libexec</span><span>和</span><span lang="EN-US">share。</span></p>
+
+</div>
+
+
+
+
+<div align="left"><img style="line-height: 1.5;" src="http://images.cnitblog.com/blog/370046/201302/02152814-8ad7b743e94d47e4a273d26f17fc039b.jpg" alt="" /><span style="line-height: 1.5;">&nbsp;</span></div>
+
+
+
+
+<p>修改目录权限</p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;"># chown nagios.nagios /usr/local/nagios
+
+# chown -R nagios.nagios /usr/local/nagios/libexec</span></pre>
+
+</div>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02152955-bba448f8c550421199e95f5abcd2a367.jpg" alt="" /></p>
+
+
+
+
+<p><span>c. 安装NRPE</span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;"># wget http://prdownloads.sourceforge.net/sourceforge/nagios/nrpe-2.13.tar.gz
+
+# tar zxvf nrpe-2.13.tar.gz
+
+# cd nrpe-2.13
+
+# ./configure</span></pre>
+
+</div>
+
+
+
+
+<p><span><img src="http://images.cnitblog.com/blog/370046/201302/02153432-514737688d5e44c981423882673c6842.jpg" alt="" /></span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre># make all</pre>
+
+</div>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02153525-60524407b4d44378a546bbe0bec82bb9.jpg" alt="" /></p>
+
+
+
+
+<p>接下来安装NPRE插件，daemon和示例配置文件。</p>
+
+
+
+
+<p>c.1 安装check_nrpe 这个插件</p>
+
+
+
+
+<p># make install-plugin</p>
+
+
+
+
+<p>监控机需要安装check_nrpe 这个插件，被监控机并不需要，我们在这里安装它只是为了测试目的。</p>
+
+
+
+
+<p>c.2 安装deamon</p>
+
+
+
+
+<p># make install-daemon</p>
+
+
+
+
+<p>c.3 安装配置文件</p>
+
+
+
+
+<p># make install-daemon-config</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02153951-c1778a148ed74b088fee4ada04aa3512.jpg" alt="" /></p>
+
+
+
+
+<p>现在再查看nagios 目录就会发现有5个目录了</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02154106-69cd13fa72dc49d09132a4c981443559.jpg" alt="" /></p>
+
+
+
+
+<p>按照安装文档的说明，是将NRPE deamon作为xinetd下的一个服务运行的。在这样的情况下xinetd就必须要先安装好，不过一般系统已经默认安装了。</p>
+
+
+
+
+<p>d. 安装xinted 脚本</p>
+
+
+
+
+<p># make install-xinetd</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02154307-bee4a49f8d87420a87899cd9c840c6d9.jpg" alt="" /></p>
+
+
+
+
+<p><span>可以看到创建了这个文件</span><span lang="EN-US">/etc/xinetd.d/nrpe。</span></p>
+
+
+
+
+<p><span lang="EN-US">编辑这个脚本：</span></p>
+
+
+
+
+<p><span lang="EN-US"><img src="http://images.cnitblog.com/blog/370046/201302/02154418-5de6ef5ff71e42469c240fa9f9402ce1.jpg" alt="" /></span></p>
+
+
+
+
+<p><span lang="EN-US">在only_from 后增加监控主机的IP地址。</span></p>
+
+
+
+
+<p>编辑/etc/services 文件，增加NRPE服务</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02155336-8586723f931c4fffb70c1cc1c3a3f4dc.jpg" alt="" /></p>
+
+
+
+
+<p>重启xinted 服务</p>
+
+
+
+
+<p># service xinetd restart</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02155344-580e8616185d4aa0b984b151955ee330.jpg" alt="" /></p>
+
+
+
+
+<p>查看NRPE 是否已经启动</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02155355-6fb6cb5dcf844d09b48dfddd988d8c5d.jpg" alt="" /></p>
+
+
+
+
+<p><span>可以看到</span><span lang="EN-US">5666</span><span>端口已经在监听了。</span></p>
+
+
+
+
+<p>e. 测试<span lang="EN-US">NRPE</span>是否则正常工作</p>
+
+
+
+
+<p>使用上面在被监控机上安装的check_nrpe 这个插件测试NRPE 是否工作正常。</p>
+
+
+
+
+<p># /usr/local/nagios/libexec/check_nrpe -H localhost</p>
+
+
+
+
+<p>会返回当前NRPE的版本</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02160042-6ae7c0101c264ff8b8076192ace36a23.jpg" alt="" /></p>
+
+
+
+
+<p>也就是在本地用check_nrpe连接nrpe daemon是正常的。</p>
+
+
+
+
+<p>注：为了后面工作的顺利进行，注意本地防火墙要打开5666能让外部的监控机访问。</p>
+
+
+
+
+<p>f. check_nrpe 命令用法</p>
+
+
+
+
+<p>查看check_nrpe 命令用法</p>
+
+
+
+
+<p># /usr/local/nagios/libexec/check_nrpe &ndash;h</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02161053-48f17806b6904b5688d61870a2ad0232.jpg" alt="" /></p>
+
+
+
+
+<p>可以看到用法是：</p>
+
+
+
+
+<p>check_nrpe &ndash;H 被监控的主机 -c 要执行的监控命令</p>
+
+
+
+
+<p>注意：-c 后面接的监控命令必须是nrpe.cfg 文件中定义的。也就是NRPE daemon只运行nrpe.cfg中所定义的命令。</p>
+
+
+
+
+<p>g.&nbsp;查看NRPE的监控命令</p>
+
+
+
+
+<p># cd /usr/local/nagios/etc</p>
+
+
+
+
+<p># cat nrpe.cfg |grep -v &#8220;^#&#8221;|grep -v &#8220;^$&#8221;</p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">[root@Nagiso-Linux etc]# cat nrpe.cfg |grep -v "^#"|grep -v "^$"
+
+log_facility=daemon
+
+pid_file=/var/run/nrpe.pid
+
+server_port=5666
+
+nrpe_user=nagios
+
+nrpe_group=nagios
+
+allowed_hosts=127.0.0.1
+
+ 
+
+dont_blame_nrpe=0
+
+debug=0
+
+command_timeout=60
+
+connection_timeout=300
+
+command[<span style="color: #ff0000;">check_users</span>]=/usr/local/nagios/libexec/check_users -w 5 -c 10
+
+command[<span style="color: #ff0000;">check_load</span>]=/usr/local/nagios/libexec/check_load -w 15,10,5 -c 30,25,20
+
+command[<span style="color: #ff0000;">check_sda1</span>]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /dev/sda1
+
+command[<span style="color: #ff0000;">check_zombie_procs</span>]=/usr/local/nagios/libexec/check_procs -w 5 -c 10 -s Z
+
+command[<span style="color: #ff0000;">check_total_procs</span>]=/usr/local/nagios/libexec/check_procs -w 150 -c 200 
+
+[root@Nagiso-Linux etc]# </span></pre>
+
+</div>
+
+
+
+
+<p>红色部分是命令名，也就是check_nrpe 的-c 参数可以接的内容，等号 &ldquo;=&rdquo; 后面是实际执行的插件程序（这与commands.cfg 中定义命令的形式十分相似，只不过是写在了一行）。也就是说check_users 就是等号后面/usr/local/nagios/libexec/check_users -w 5 -c 10 的简称。</p>
+
+
+
+
+<p>我们可以很容易知道上面这5行定义的命令分别是检测登陆用户数，cpu负载，sda1的容量，僵尸进程，总进程数。各条命令具体的含义见插件用法（执行&ldquo;插件程序名 &ndash;h&rdquo;）。</p>
+
+
+
+
+<p>由于-c 后面只能接nrpe.cfg 中定义的命令，也就是说现在我们只能用上面定义的这五条命令。我们可以在本机实验一下。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02162617-1c0b8b7a4b554f58903459594c7c1e5c.jpg" alt="" width="900" /></p>
+
+
+
+
+<p>9.3 在监控主机（Nagios-Server）上</p>
+
+
+
+
+<p>之前已经将Nagios运行起来了，现在要做的事情是：</p>
+
+
+
+
+<ul>
+
+<li>安装check_nrpe 插件；</li>
+
+<li>在commands.cfg 中创建check_nrpe 的命令定义，因为只有在commands.cfg 中定义过的命令才能在services.cfg 中使用；</li>
+
+<li>创建对被监控主机的监控项目；</li>
+
+</ul>
+
+
+
+
+<p>9.3.1 安装check_nrpe 插件</p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;"># tar zxvf nrpe-2.13.tar.gz 
+
+# cd nrpe-2.13
+
+# ./configure
+
+# make all
+
+# make install-plugin</span></pre>
+
+</div>
+
+
+
+
+<p><span>只运行这一步就行了，</span><span>因为只需要</span><span lang="EN-US">check_nrpe</span><span>插件。</span></p>
+
+
+
+
+<p>在Nagios-Linux 上我们已经装好了nrpe，现在我们测试一下监控机使用check_nrpe 与被监控机运行的nrpe daemon之间的通信。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02165718-6aa53e921dc2432a9738a5638aaa17e3.jpg" alt="" /></p>
+
+
+
+
+<p>看到已经正确返回了NRPE的版本信息，说明一切正常。</p>
+
+
+
+
+<p>9.3.2&nbsp;在<span lang="EN-US">commands.cfg</span>中增加对<span lang="EN-US">check_nrpe</span>的定义</p>
+
+
+
+
+<p># vi&nbsp;/usr/local/nagios/etc/objects/commands.cfg</p>
+
+
+
+
+<p><span>在最后面增加如下内容：</span></p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02170218-5800896bf01e45f5b781a1f46ce2efb5.jpg" alt="" /></p>
+
+
+
+
+<p>意义如下：</p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;"># 'check_nrpe' command definition
+
+define command{
+
+        command_name    check_nrpe         # <span>定义命令名称为</span><span lang="EN-US">check_nrpe,</span><span>在</span><span lang="EN-US">services.cfg</span><span>中要使用这个名称</span><span lang="EN-US">.</span>
+
+        command_line    $USER1$/check_nrpe -H $HOSTADDRESS$ -c $ARG1$       #<span>这是定义实际运行的插件程序</span><span lang="EN-US">.<br /></span><span>                        # 这个命令行的书写要完全按照</span><span lang="EN-US">check_nrpe</span><span>这个命令的用法,</span><span>不知道用法的就用</span><span lang="EN-US">check_nrpe &ndash;h</span><span>查看.</span>
+
+        }</span></pre>
+
+</div>
+
+
+
+
+<div align="left">
+
+<p>-c 后面带的$ARG1$ 参数是传给nrpe daemon 执行的检测命令，之前说过了它必须是nrpe.cfg 中所定义的那5条命令中的其中一条。在services.cfg 中使用check_nrpe 的时候要用 &ldquo;!&rdquo; 带上这个参数。</p>
+
+<p>9.3.3 定义对Nagios-Linux 主机的监控</p>
+
+<p>下面就可以在services.cfg 中定义对Nagios-Linux 主机的监控了。</p>
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">define service{
+
+        use                     local-service
+
+        host_name               Nagios-Linux
+
+        service_description     Current Load
+
+        check_command           check_nrpe!check_load
+
+        }
+
+
+
+define service{
+
+        use                     local-service
+
+        host_name               Nagios-Linux
+
+        service_description     Check Disk sda1
+
+        check_command           check_nrpe!check_sda1
+
+        }
+
+
+
+define service{
+
+        use                     local-service
+
+        host_name               Nagios-Linux
+
+        service_description     Total Processes
+
+        check_command           check_nrpe!check_total_procs
+
+        }
+
+
+
+define service{
+
+        use                     local-service
+
+        host_name               Nagios-Linux
+
+        service_description     Current Users
+
+        check_command           check_nrpe!check_users
+
+        }
+
+
+
+define service{
+
+        use                     local-service
+
+        host_name               Nagios-Linux
+
+        service_description     Check Zombie Procs
+
+        check_command           check_nrpe!check_zombie_procs
+
+        }</span></pre>
+
+</div>
+
+<p>还有一个任务是要监控Nagios-Linux 的swap 使用情况。但是在nrpe.cfg 中默认没有定义这个监控功能的命令。怎么办？手动在nrpe.cfg 中添加，也就是自定义NRPE命令。</p>
+
+<p>现在我们要监控swap 分区，如果空闲空间小于20%则为警告状态 -&gt; warning；如果小于10%则为严重状态 -&gt; critical。我们可以查得需要使用check_swap插件，完整的命令行应该是下面这样。</p>
+
+<p># /usr/local/nagios/libexec/check_swap -w 20% -c 10%<br /> <br />在被监控机（Nagios-Linux）上增加check_swap 命令的定义</p>
+
+<p># vi /usr/local/nagios/etc/nrpe.cfg</p>
+
+<p>增加下面这一行</p>
+
+<p>command[check_swap]=/usr/local/nagios/libexec/check_swap -w 20% -c 10%</p>
+
+<p>我们知道check_swap 现在就可以作为check_nrpe 的-c 的参数使用了</p>
+
+<p>修改了配置文件，当然要重启。</p>
+
+<p>如果你是以独立的daemon运行的nrpe，那么需要手动重启；如果你是在xinetd 下面运行的，则不需要。</p>
+
+<p>由于本实验中nrpe 是xinetd 下运行的，所以不需要重启服务。<br /> <br />在监控机（Nagios-Server）上增加这个check_swap 监控项目</p>
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">define service{
+
+        use                     local-service
+
+        host_name               Nagios-Linux
+
+        service_description     Check Swap
+
+        check_command           check_nrpe!check_swap
+
+        }</span></pre>
+
+</div>
+
+<p>同理，Nagios-Linux 上我还开启了http 服务，需要监控一下，按照上面的做法，在被监控机（Nagios-Linux）上增加check_http 命令的定义</p>
+
+<p># vi /usr/local/nagios/etc/nrpe.cfg</p>
+
+<p>增加下面这一行</p>
+
+<p>command[check_http]=/usr/local/nagios/libexec/check_http&nbsp;-I 127.0.0.1</p>
+
+<p>在监控机（Nagios-Server）上增加check_http 监控项目</p>
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;">define service{
+
+        use                     local-service
+
+        host_name               Nagios-Linux
+
+        service_description     HTTP
+
+        check_command           check_nrpe!check_http
+
+        }</span></pre>
+
+</div>
+
+<p>所有的配置文件已经修改好了，现在重启Nagios。</p>
+
+<p># service nagios restart</p>
+
+<p>9.3.4 查看配置情况</p>
+
+<p>登录Nagios Web监控页<a href="http://172.16.1.124/nagios/">http://192.168.1.108/nagios/</a>&nbsp;查看相关信息。</p>
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02184124-51bf1a34b0fb45deb5f9f8cc3762b24b.jpg" alt="" width="900" /></p>
+
+<p>可以看到，对于Nagios-Server 和Nagios-Linux 上的相关服务的监控已经成功了，还有Nagios-Windows 上的服务还没有定义，下面讲到。</p>
+
+</div>
+
+
+
+
+<p><span style="font-size: 16px;"><strong><span style="color: #800000;">十、利用NSClient++监控远程Windows上的&ldquo;本地信息&rdquo;</span></strong></span></p>
+
+
+
+
+<p><span><span>在Nagios的libexec下有check_nt这个插件，它就是用来检查windows机器的服务的。其功能类似于check_nrpe。不过还需要搭配另外一个软件NSClient++，它则类似于NRPE。</span></span></p>
+
+
+
+
+<p><span><span><span lang="EN-US">NSClient++</span><span>的原理如下图</span></span></span></p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201301/30220738-30882fabacfb4e27b78d1f033457ed66.png" alt="" /></p>
+
+
+
+
+<p>可以看到NSClient与nrpe最大的区别就是：</p>
+
+
+
+
+<ul>
+
+<li>被监控机上安装有nrpe，并且还有插件，最终的监控是由这些插件来进行的。当监控主机将监控请求发给nrpe后，nrpe调用插件来完成监控。</li>
+
+<li>NSClient++则不同，被监控机上只安装NSClient，没有任何的插件。当监控主机将监控请求发给NSClient++后，NSClient直接完成监控，所有的监控是由NSClient完成的。</li>
+
+</ul>
+
+
+
+
+<p>这也说明了NSClient++的一个很大的问题：不灵活、没有可扩展性。它只能完成自己本身包含的监控操作，不能由一些插件来扩展。好在NSClient++已经做的不错了，基本上可以完全满足我们的监控需求。</p>
+
+
+
+
+<p>10.1 安装NSClient++</p>
+
+
+
+
+<p>从http://www.nsclient.org/nscp/downloads 下载NSClient++-0.2.7.zip<span><br /></span></p>
+
+
+
+
+<p><span><span>解压到C盘根目录。</span><span lang="EN-US"><br /></span></span></p>
+
+
+
+
+<p><span>打开</span><span lang="EN-US">cmd&nbsp;</span><span>切换到c</span><span lang="EN-US">:\NSClient++-0.2.7</span></p>
+
+
+
+
+<p><span lang="EN-US"><span>执行</span><span lang="EN-US">nsclient++ /install&nbsp;</span><span>进行安装</span></span></p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02222453-f97392fad0d34a4eb1cb9fedccc6c2ee.jpg" alt="" /></p>
+
+
+
+
+<p><span>执行</span><span lang="EN-US">nsclient++ SysTray （</span><span>注意大小写），</span><span>这一步是安装系统托盘，</span><span>时间稍微有点长。</span></p>
+
+
+
+
+<p><span><img src="http://images.cnitblog.com/blog/370046/201302/02222739-b0076ad25fbe40d99ff7094f43418657.jpg" alt="" /></span></p>
+
+
+
+
+<div align="left"><span style="line-height: 1.5;">在运行里面输入</span><span style="line-height: 1.5;" lang="EN-US">services.msc&nbsp;</span><span style="line-height: 1.5;">打开&ldquo;</span><span style="line-height: 1.5;">服务</span><span style="line-height: 1.5;" lang="EN-US">&rdquo;</span></div>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02222826-55f5e345f2784ba0b56b7b7b0662ac3e.jpg" alt="" />&nbsp;</p>
+
+
+
+
+<p><span style="line-height: 1.5;">看到下图就说明</span><span style="line-height: 1.5;" lang="EN-US">NSClient</span><span style="line-height: 1.5;">服务已经安装上了</span></p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02222842-718e9a7851a348809b4d00244e369544.jpg" alt="" />&nbsp;</p>
+
+
+
+
+<p><span><span>双击打开，</span><span>点&ldquo;</span><span>登录&rdquo;</span><span>标签，</span><span>在&ldquo;</span><span>允许服务与桌面交互</span><span lang="EN-US">&rdquo;</span><span>前打勾。</span></span></p>
+
+
+
+
+<p><span><span><img src="http://images.cnitblog.com/blog/370046/201302/02222955-6dd9e31b131b4bc2a137f46dda09e8b1.jpg" alt="" /></span></span></p>
+
+
+
+
+<p>编辑c<span lang="EN-US">:\NSClient++-0.2.7</span>下的NSC.ini文件。</p>
+
+
+
+
+<p>将 [modules]部分的所有模块前面的注释都去掉，除了CheckWMI.dll 和 RemoteConfiguration.dll 这两个。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02223212-afed475403544ea0b037fbac68395cb0.jpg" alt="" /></p>
+
+
+
+
+<p>在[Settings]部分设置&#8217;password&#8217;选项来设置密码，作用是在nagios连接过来时要求提供密码。这一步是可选的，我这里设置为&#8217;123456&#8217;。</p>
+
+
+
+
+<p>将[Settings]部分&#8217;allowed_hosts&#8217;选项的注释去掉，并且加上运行nagios的监控主机的IP。各IP之间以逗号相隔。这个地方是支持子网的，如果写成192.168.1.0/24则表示该子网内的所有机器都可以访问。如果这个地方是空白则表示所有的主机都可以连接上来。</p>
+
+
+
+
+<p>注意是[Settings]部分的，因为[NSClient]部分也有这个选项。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02223457-967f3fe2992b40dbb7da9d362d21f68c.jpg" alt="" /></p>
+
+
+
+
+<p>必须保证[NSClient]的&#8217;port&#8217;选项并没有被注释，并且它的值是&#8217;12489&#8217;，这是NSClient的默认监听端口。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02223617-e4deb1c31c21414eb1fda2d4547b00dd.jpg" alt="" /></p>
+
+
+
+
+<p>在cmd 中执行nsclient++ /start启动服务，注意所在目录是c:\NSClient++-0.2.7</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02223713-a55666da26bb47338db68d06d04db0ff.jpg" alt="" /></p>
+
+
+
+
+<p><span>这时在桌面右下角的系统托盘处会出现一个黄色的</span><span lang="EN-US">M</span><span>字样的图标</span></p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02223741-eea5809e0c0a4a75920308e0530a679e.jpg" alt="" /></p>
+
+
+
+
+<p>查看服务</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02223800-aa5a5cf0f907417e804e1bf42e3ad95c.jpg" alt="" /></p>
+
+
+
+
+<p>已经正常启动了。</p>
+
+
+
+
+<p>注意服务默认设的是&ldquo;自动&rdquo;，也就是说是开机自动启动的。</p>
+
+
+
+
+<p>在cmd 里面执行netstat &ndash;an 可以看到已经开始监听tcp的12489端口了。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/02223852-f70c360e03204553a28086040839174d.jpg" alt="" /></p>
+
+
+
+
+<p>这样外部就可以访问了吗？</p>
+
+
+
+
+<p>错！</p>
+
+
+
+
+<p>防火墙也要打开tcp的12489端口，否则nagios 检查此服务的时候会报错。</p>
+
+
+
+
+<p>这样被监控机的配置就搞定了，它就等待nagios 发出某个监控请求，然后它执行请求将监控的结果发回到nagios监控主机上。</p>
+
+
+
+
+<p>之前已经在监控主机（Nagios-Server）上对Windows 主机的监控做了配置，但是commands.cfg 中默认没有设置密码项，所以要修改一下，增加&#8221;-s 123456&#8221;，如下：</p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre><span style="color: #000000;"># 'check_nt' command definition
+
+define command{
+
+        command_name    check_nt
+
+        command_line    $USER1$/check_nt -H $HOSTADDRESS$ -p 12489 <span style="color: #ff0000;">-s 123456</span> -v $ARG1$ $ARG2$
+
+        }</span></pre>
+
+</div>
+
+
+
+
+<p>现在打开Nagios Web监控页便可查看到相关信息了。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/03002806-934748e3f1444b44aabe7310156e23f7.jpg" alt="" width="900" /></p>
+
+
+
+
+<p>可以看到有错误：NSClient - ERROR: PDH Collection thread not running.</p>
+
+
+
+
+<p>Google 一下，是<span>由于操作系统语言的问题，</span><span>好像</span><span lang="EN-US">NSClient&nbsp;</span><span>默认支持的语言并不多，具体可以百度一下。</span></p>
+
+
+
+
+<p><span><span>查看</span><span lang="EN-US">NSClient</span><span>的日志</span><span lang="EN-US">C:\NSClient++-0.2.7\</span><span lang="EN-US">nsclient.log，</span><span>信息如下：</span></span></p>
+
+
+
+
+<div class="cnblogs_code">
+
+<pre>2013-02-02 22:05:30: error:.\PDHCollector.cpp:98: You need to manually configure performance counters!</pre>
+
+</div>
+
+
+
+
+<p><span>需要手动配置performance counters。</span></p>
+
+
+
+
+<p><span>打开C:\NSClient++-0.2.7\</span><span lang="EN-US">counters.defs</span><span>文件，</span><span>复制文件里面</span><span lang="EN-US">&#8220;English US&#8221;</span><span>那部分内容，粘贴到counters.defs 文件的最后，</span><span>修改Description = &#8220;Chinese&#8221;。</span></p>
+
+
+
+
+<p><span lang="EN-US"><img src="http://images.cnitblog.com/blog/370046/201302/03003715-2d845ecd7f104003980895b758997d71.jpg" alt="" /></span></p>
+
+
+
+
+<p><span>修改完之后，在mmc中重启NSClient 服务。</span></p>
+
+
+
+
+<p>然后查看日志，内容如下：</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/03004023-10d2dacf5c6a4d57bbb1c723972a67bd.jpg" alt="" /></p>
+
+
+
+
+<p>在正常执行了。</p>
+
+
+
+
+<p>打开Nagios Web监控页查看。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/03004313-fff4fffe267a498ea4941b5925564781.jpg" alt="" width="900" /></p>
+
+
+
+
+<p>执行成功，但是W3SVC服务为Unknown 状态。查资料，需要开启Windows 的IIS服务。</p>
+
+
+
+
+<p>打开&ldquo;控制面板&rdquo;进行安装。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/03004546-b47a77a22f3440c99129b573abca1358.jpg" alt="" /></p>
+
+
+
+
+<p>安装完毕后，再到Nagios Web监控页查看，全部监控正常。</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/03004705-d95839ed394c48c1a6d19ca90a3137b5.jpg" alt="" width="900" />&nbsp;</p>
+
+
+
+
+<p><span style="font-size: 16px;"><strong><span style="color: #800000;">十一、Nagios邮件报警的配置</span></strong></span></p>
+
+
+
+
+<p>11.1 安装sendmail 组件</p>
+
+
+
+
+<p><span>首先要确保sendmail 相关组件的完整安装，我们可以使用如下的命令来完成sendmail 的安装：</span></p>
+
+
+
+
+<p><span># yum install -y sendmail*<br /></span></p>
+
+
+
+
+<p><span>然后重新启动sendmail服务：</span></p>
+
+
+
+
+<p><span># service sendmail restart<br /></span></p>
+
+
+
+
+<p><span>然后发送测试邮件，验证sendmail的可用性：</span></p>
+
+
+
+
+<p><span># echo &#8220;Hello World&#8221; | mail david.tang</span><span>@bsmart.cn</span></p>
+
+
+
+
+<p><span>11.2 邮件报警的配置</span></p>
+
+
+
+
+<p><span>在上面我们已经简单配置过了<span>/usr/local/nagios/etc/objects/</span>contacts.cfg 文件，Nagios 会将报警邮件发送到配置文件里的E-mail 地址。</span></p>
+
+
+
+
+<p><span>11.3 Nagios 通知</span></p>
+
+
+
+
+<p><span>PROBLEM</span></p>
+
+
+
+
+<p><span><img src="http://images.cnitblog.com/blog/370046/201302/03123045-ec847fc850c34f96bfa7bdbd60dde61f.jpg" alt="" /></span></p>
+
+
+
+
+<p>RECOVERY</p>
+
+
+
+
+<p><img src="http://images.cnitblog.com/blog/370046/201302/03123059-7514d44967c040b5a6146b453cba9132.jpg" alt="" /></p>
+
+
+
+
+<p>Linux下Nagios安装配置完毕。&nbsp;</p>
+
+
+
+
+<p>&nbsp;</p>
+
+
+
+
+<p><span style="font-size: 16px;"><strong>参考资料</strong></span></p>
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">李立夫</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-22T19:18:31+08:00" pubdate data-updated="true">May 22<span>nd</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/03/03/html5/" title="Previous Post: 使用HTML5开发Android本地应用">&laquo; 使用HTML5开发Android本地应用</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/08/03/nss/" title="Next Post: Nss及它与PAM的关系">Nss及它与PAM的关系 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+<p><img src="/images/blogImgs/about.jpg"></p> 
+ <p>A little something about me.</p>
+<p>李立夫，毕业于天津大学软件学院</p>
+<p>热爱开发，曾在firefox实习做系统运维，现于NNIT做系统运维师，有一年实习经验以及一年工作经验</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/hadoop/">Hadoop学习</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/mysql-install/">linux下关于mySQL的安装和配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs2/">Lvs核心ipvs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs/">Lvs简介</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/03/lvs-heartbeat/">使用LVS+Heartbeat配置Linux群集</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - 李立夫 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

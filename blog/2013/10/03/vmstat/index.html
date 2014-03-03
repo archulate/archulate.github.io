@@ -1,0 +1,558 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Linux系统监控工具之vmstat详解 - Archulate's Blog</title>
+  <meta name="author" content="李立夫">
+
+  
+  <meta name="description" content="vmstat是一个十分有用的Linux系统监控工具，使用vmstat命令可以得到关于进程、内存、内存分页、堵塞IO、traps及CPU活动的信息。 51CTO编辑推荐：Linux监控工具大全 一、前言 很显然从名字中我们就可以知道vmstat是一个查看虚拟内存（Virtual Memory） &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://archulate.github.io/blog/2013/10/03/vmstat">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Archulate's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Archulate's Blog</a></h1>
+  
+    <h2>System maintence work blog</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:archulate.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Linux系统监控工具之vmstat详解</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-03T18:46:53+08:00" pubdate data-updated="true">Oct 3<span>rd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!--more-->
+
+
+<p>vmstat是一个十分有用的Linux系统监控工具，使用vmstat命令可以得到关于进程、内存、内存分页、堵塞IO、traps及CPU活动的信息。</p>
+
+
+
+
+<p><span style="font-family: 黑体">51CTO编辑推荐：</span><a href="http://os.51cto.com/art/201005/200741.htm" target="_blank"><span style="font-family: 黑体">Linux监控工具大全</span></a></p>
+
+
+
+
+<p><strong>一、前言</strong></p>
+
+
+
+
+<p>很显然从名字中我们就可以知道vmstat是一个查看虚拟内存（Virtual Memory）使用状况的工具，但是怎样通过vmstat来发现系统中的瓶颈呢？在回答这个问题前，还是让我们回顾一下Linux中关于虚拟内存相关内容。</p>
+
+
+
+
+<p><strong>二、虚拟内存运行原理</strong></p>
+
+
+
+
+<p>在系统中运行的每个进程都需要使用到内存，但不是每个进程都需要每时每刻使用系统分配的内存空间。当系统运行所需内存超过实际的物理内存，内核会释放某些进程所占用但未使用的部分或所有物理内存，将这部分资料存储在磁盘上直到进程下一次调用，并将释放出的内存提供给有需要的进程使用。</p>
+
+
+
+
+<p>在Linux内存管理中，主要是通过&ldquo;调页Paging&rdquo;和&ldquo;交换Swapping&rdquo;来完成上述的内存调度。调页算法是将内存中最近不常使用的页面换到磁盘上，把活动页面保留在内存中供进程使用。交换技术是将整个进程，而不是部分页面，全部交换到磁盘上。</p>
+
+
+
+
+<p>分页(Page)写入磁盘的过程被称作Page-Out，分页(Page)从磁盘重新回到内存的过程被称作Page-In。当内核需要一个分页时，但发现此分页不在物理内存中(因为已经被Page-Out了)，此时就发生了分页错误（Page Fault）。</p>
+
+
+
+
+<p>当系统内核发现可运行内存变少时，就会通过Page-Out来释放一部分物理内存。经管Page-Out不是经常发生，但是如果Page-out频繁不断的发生，直到当内核管理分页的时间超过运行程式的时间时，系统效能会急剧下降。这时的系统已经运行非常慢或进入暂停状态，这种状态亦被称作thrashing(颠簸)。</p>
+
+
+
+
+<p><strong>三、使用vmstat</strong></p>
+
+
+
+
+<p><strong>1.用法</strong></p>
+
+
+
+
+<p>vmstat [-a] [-n] [-S unit] [delay [ count]]</p>
+
+
+
+
+<p>vmstat [-s] [-n] [-S unit]</p>
+
+
+
+
+<p>vmstat [-m] [-n] [delay [ count]]</p>
+
+
+
+
+<p>vmstat [-d] [-n] [delay [ count]]</p>
+
+
+
+
+<p>vmstat [-p disk partition] [-n] [delay [ count]]</p>
+
+
+
+
+<p>vmstat [-f]</p>
+
+
+
+
+<p>vmstat [-V]</p>
+
+
+
+
+<p>-a：显示活跃和非活跃内存</p>
+
+
+
+
+<p>-f：显示从系统启动至今的fork数量 。引申閱讀： http://www.cnblogs.com/leoo2sk/archive/2009/12/11/talk-about-fork-in-linux.html</p>
+
+
+
+
+<p>-m：显示slabinfo</p>
+
+
+
+
+<p>-n：只在开始时显示一次各字段名称。</p>
+
+
+
+
+<p>-s：显示内存相关统计信息及多种系统活动数量。</p>
+
+
+
+
+<p>delay：刷新时间间隔。如果不指定，只显示一条结果。</p>
+
+
+
+
+<p>count：刷新次数。如果不指定刷新次数，但指定了刷新时间间隔，这时刷新次数为无穷。</p>
+
+
+
+
+<p>-d：显示磁盘相关统计信息。</p>
+
+
+
+
+<p>-p：显示指定磁盘分区统计信息</p>
+
+
+
+
+<p>-S：使用指定单位显示。参数有 k 、K 、m 、M ，分别代表1000、1024、1000000、1048576字节（byte）。默认单位为K（1024 bytes）</p>
+
+
+
+
+<p>-V：显示vmstat版本信息。</p>
+
+
+
+
+<p></p>
+
+
+
+
+<p><strong>2.使用说明</strong></p>
+
+
+
+
+<p>例子1：每2秒输出一条结果</p>
+
+
+
+
+<p><img  class='fit-image' onload='javascript:if(this.width>498)this.width=498;&#8217; onmousewheel = &#8216;javascript:return big(this)&#8217; border=&#8221;0&#8221; alt=&#8221;&#8221; small=&#8221;0&#8221; src=&#8221;http://images.51cto.com/files/uploadimg/20100519/1023590.jpg&#8221; /></p>
+
+
+
+
+<p>字段说明：</p>
+
+
+
+
+<p>Procs（进程）：</p>
+
+
+
+
+<p>r: 运行队列中进程数量</p>
+
+
+
+
+<p>b: 等待IO的进程数量</p>
+
+
+
+
+<p>Memory（内存）：</p>
+
+
+
+
+<p>swpd: 使用虚拟内存大小</p>
+
+
+
+
+<p>free: 可用内存大小</p>
+
+
+
+
+<p>buff: 用作缓冲的内存大小</p>
+
+
+
+
+<p>cache: 用作缓存的内存大小</p>
+
+
+
+
+<p>Swap：</p>
+
+
+
+
+<p>si: 每秒从交换区写到内存的大小</p>
+
+
+
+
+<p>so: 每秒写入交换区的内存大小</p>
+
+
+
+
+<p>IO：（现在的Linux版本块的大小为1024bytes）</p>
+
+
+
+
+<p>bi: 每秒读取的块数</p>
+
+
+
+
+<p>bo: 每秒写入的块数</p>
+
+
+
+
+<p>系统：</p>
+
+
+
+
+<p>in: 每秒中断数，包括时钟中断。</p>
+
+
+
+
+<p>cs: 每秒上下文切换数。</p>
+
+
+
+
+<p>CPU（以百分比表示）：</p>
+
+
+
+
+<p>us: 用户进程执行时间(user time)</p>
+
+
+
+
+<p>sy: 系统进程执行时间(system time)</p>
+
+
+
+
+<p>id: 空闲时间(包括IO等待时间)</p>
+
+
+
+
+<p>wa: 等待IO时间</p>
+
+
+
+
+<p>例子2：显示活跃和非活跃内存</p>
+
+
+
+
+<p><img  class='fit-image' onload='javascript:if(this.width>498)this.width=498;&#8217; onmousewheel = &#8216;javascript:return big(this)&#8217; border=&#8221;0&#8221; alt=&#8221;&#8221; small=&#8221;0&#8221; src=&#8221;http://images.51cto.com/files/uploadimg/20100519/1023591.jpg&#8221; /></p>
+
+
+
+
+<p>使用-a选项显示活跃和非活跃内存时，所显示的内容除增加inact和active外，其他显示内容与例子1相同。</p>
+
+
+
+
+<p>字段说明：</p>
+
+
+
+
+<p>Memory（内存）：</p>
+
+
+
+
+<p>inact: 非活跃内存大小（当使用-a选项时显示）</p>
+
+
+
+
+<p>active: 活跃的内存大小（当使用-a选项时显示）</p>
+
+
+
+
+<p><em>本文来源：http://hi.baidu.com/imlidapeng/blog/item/51872329329ab8335243c1c9.html</em></p>
+
+
+
+
+<p>【编辑推荐】</p>
+
+
+
+
+<ol>
+
+    <li><a target="_blank" href="http://os.51cto.com/art/201005/200652.htm">Linux系统监控工具之top详解</a></li>
+
+    <li><a target="_blank" href="http://os.51cto.com/art/201005/200285.htm">四大Linux备份工具比较与操作实例</a></li>
+
+    <li><a target="_blank" href="http://os.51cto.com/art/201004/193498.htm">Linux管理员不可不知的五大命令+工具</a></li>
+
+</ol>
+
+
+
+
+<div align="right">【责任编辑：<a class="ln" href="mailto:yangsai@51cto.com">杨赛</a> TEL：（010）68476606】</div>
+
+
+<br> 
+
+
+<p class="blank10"></p>
+
+
+<p></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">李立夫</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-03T18:46:53+08:00" pubdate data-updated="true">Oct 3<span>rd</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/09/23/hack-analyse/" title="Previous Post: 一次服务器被入侵后的分析">&laquo; 一次服务器被入侵后的分析</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/10/13/mysql-optimizing/" title="Next Post: mysql参数优化">mysql参数优化 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+<p><img src="/images/blogImgs/about.jpg"></p> 
+ <p>A little something about me.</p>
+<p>李立夫，毕业于天津大学软件学院</p>
+<p>热爱开发，曾在firefox实习做系统运维，现于NNIT做系统运维师，有一年实习经验以及一年工作经验</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/hadoop/">Hadoop学习</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/mysql-install/">linux下关于mySQL的安装和配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs2/">Lvs核心ipvs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs/">Lvs简介</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/03/lvs-heartbeat/">使用LVS+Heartbeat配置Linux群集</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - 李立夫 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

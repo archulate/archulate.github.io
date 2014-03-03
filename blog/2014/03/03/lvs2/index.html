@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Lvs核心ipvs - Archulate's Blog</title>
+  <meta name="author" content="李立夫">
+
+  
+  <meta name="description" content="在互连网应用技术里,负载均衡一直是热门话题,本文讨论的负载均衡技术,包括但不限于负载均衡本身。使用负载均衡技术主要的目的包括如下几点：　　◆&nbsp;系统高可用性。组成系统的某些设备或部件失效，并不会影响正常的服务。　　◆&nbsp;系统可扩展性。用户的增加，引起访问数乃至流量的增加， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://archulate.github.io/blog/2014/03/03/lvs2">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Archulate's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Archulate's Blog</a></h1>
+  
+    <h2>System maintence work blog</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:archulate.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Lvs核心ipvs</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-03T00:42:34+08:00" pubdate data-updated="true">Mar 3<span>rd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!--more-->
+
+
+<p>在互连网应用技术里,<a href='http://product.it168.com/list/b/0462_1.shtml' target='_blank' class="nounderline" title='负载均衡'>负载均衡</a>一直是热门话题,本文讨论的负载均衡技术,包括但不限于负载均衡本身。使用负载均衡技术主要的目的包括如下几点：</p><p>　　◆&nbsp;系统高可用性。组成系统的某些设备或部件失效，并不会影响正常的服务。</p><p>　　◆&nbsp;系统可扩展性。用户的增加，引起访问数乃至流量的增加，这种情形下，需要对系统进行扩容，以应对这种快速增长。对于提供高可用服务的互联网网站，其对可扩展的基本要求就是在保持系统服务不终止的情况下，透明的扩充容量，即用户不知道扩容的存在，或者说是扩容不对现有的服务产生任何负面作用。这些扩展主要包括：带宽扩展、<a href='http://product.it168.com/files/0402search.shtml' target='_blank' class="nounderline" title='服务器'>服务器</a>扩展、<a href='http://storage.it168.com/' target='_blank' class="nounderline" title='存储'>存储</a>容量扩展、数据库扩展等，当然也包括主机增加<a href='http://product.it168.com/list/b/0205_1.shtml' target='_blank' class="nounderline" title='内存'>内存</a>等方面的扩展。</p><p>　　◆&nbsp;负载均衡能力。一个应用或服务由数个物理服务器提供,并且每个物理服务器运行的应用或服务是相同的,我们可以让用户的访问通过某种控制策略,把负载分摊到不同的物理服务器,从而保持每个物理服务器有比较合理的负载。当整个系统的负载趋于饱和时，通过增加物理服务器和扩充物理带宽来解决这个麻烦。增加物理服务器以后，系统的负载情况将重新在所有集群的物理服务器之间按照指定的算法重新达到新的均衡。</p><p>　　一个完整的负载均衡项目，一般由虚拟服务器、故障隔离及失败切换3个功能框架所组成。</p><p>　　虚拟服务器是负载均衡体系的基本架构，它分两层结构：转发器（Director）和真实服务器。图1为虚拟服务器的结构示意。<br />&nbsp;</p><div id="div7627917" style="text-align: center"><img id="img7627917" border="0" alt="" src="http://image4.it168.com/2009/9/21/246563e0-6bc9-4351-84ce-d907bac4b075.jpg" /></div><p>　　图1 虚拟服务器结构</p><p>　　为什么称虚拟服务器？因为从用户的角度看来，似乎只是一个服务器在提供服务。虚拟服务器最主要的功能是提供包转发和负载均衡，这个功能可以通过撰写ipvsadm脚本具体实现。虚拟服务器项目由章文嵩博士所贡献，目前已被添加到各种linux发行版的内核。</p><p>　　故障隔离指虚拟服务器中的某个真实服务器（或某几个真实服务器）失效或发生故障，系统将自动把失效的服务器从转发队列中清理出去，从而保证用户访问的正确性；另一方面，当实效的服务器被修复以后，系统再自动地把它加入转发队列。</p><p>　　失败切换，这是针对负载均衡器Director 采取的措施，在有两个负载均衡器Director的应用场景，当主负载均衡器（MASTER）失效或出现故障，备份负载均衡器（BACKUP）将自动接管主负载均衡器的工作；一旦主负载均衡器故障修复，两者将恢复到最初的角色。</p><p>　　要从技术上实现虚拟服务器、故障隔离及失败切换3个功能，需要两个工具：ipvsadm和keepalived。当然也有heartbeat这样的工具可以实现同样的功能，但相对于keepalived，heartbeat的实现要复杂得多（如撰写ipvsadm脚本，部署ldirectord，编写资源文件等）。在采用keepalived的方案里，只要ipvsadm被正确的安装，简单的配置唯一的文件keepalived就行了。</p><p>&nbsp;</p></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">李立夫</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-03T00:42:34+08:00" pubdate data-updated="true">Mar 3<span>rd</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/lvs/'>LVS</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/03/03/lvs/" title="Previous Post: lvs简介">&laquo; lvs简介</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/03/03/mysql-install/" title="Next Post:  linux下关于mySQL的安装和配置 "> linux下关于mySQL的安装和配置  &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+<p><img src="/images/blogImgs/about.jpg"></p> 
+ <p>A little something about me.</p>
+<p>李立夫，毕业于天津大学软件学院</p>
+<p>热爱开发，曾在firefox实习做系统运维，现于NNIT做系统运维师，有一年实习经验以及一年工作经验</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/hadoop/">Hadoop学习</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/mysql-install/">linux下关于mySQL的安装和配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs2/">Lvs核心ipvs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/03/lvs/">Lvs简介</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/03/lvs-heartbeat/">使用LVS+Heartbeat配置Linux群集</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - 李立夫 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

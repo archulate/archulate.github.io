@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 开发 | Archulate's Blog]]></title>
+  <link href="http://archulate.github.io/blog/categories/kai-fa/atom.xml" rel="self"/>
+  <link href="http://archulate.github.io/"/>
+  <updated>2014-03-03T23:08:07+08:00</updated>
+  <id>http://archulate.github.io/</id>
+  <author>
+    <name><![CDATA[李立夫]]></name>
+    <email><![CDATA[archulate@hotmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Spring AOP详解]]></title>
+    <link href="http://archulate.github.io/blog/2012/05/13/spring/"/>
+    <updated>2012-05-13T18:07:41+08:00</updated>
+    <id>http://archulate.github.io/blog/2012/05/13/spring</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p> <meta name="description" content="      此前对于AOP的使用仅限于声明式事务，除此之外在实际开发中也没有遇到过与之相关的问题。最近项目中遇到了以下几点需求，仔细思考之后，觉得采用AOP 来解决。一方面是为了以更加灵活的方式来解决问题，另一方面是借此机会深入学习Spring AOP相关的内容。本文是权当本人的自己AOP学习笔记，以下需求不用AOP肯定也能解决，至于是否牵强附会，仁者见仁智者见智。      对部分函数的调用进行日 ..." /></p>
+
+<pre><code>&lt;meta name="keywords" content="AOP, Spring, junit, Bean, JDK Spring AOP 详解" /&gt;
+&lt;link rel="shortcut icon" href="http://archulate.github.io/images/favicon.ico" type="image/x-icon" /&gt;
+&lt;link rel="search" type="application/opensearchdescription+xml" href="http://archulate.github.io/open_search.xml" title="ITeye" /&gt;
+&lt;link href="http://archulate.github.io/rss" rel="alternate" title="pandonix" type="application/rss+xml" /&gt;
+&lt;link href="http://www.iteye.com/stylesheets/blog.css?1393218040" media="screen" rel="stylesheet" type="text/css" /&gt;
+</code></pre>
+
+<p><link href="http://www.iteye.com/stylesheets/themes/blog/blue.css?1326191326" media="screen" rel="stylesheet" type="text/css" /></p>
+
+<pre><code>&lt;script src="http://www.iteye.com/javascripts/application.js?1358214518" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+</code></pre>
+
+<p>  var <em>gaq = </em>gaq || [];
+  <em>gaq.push([&lsquo;</em>setAccount&rsquo;, &lsquo;UA-535605-1&rsquo;]);
+  <em>gaq.push([&lsquo;</em>setDomainName&rsquo;, &lsquo;iteye.com&rsquo;]);
+  <em>gaq.push([&lsquo;</em>trackPageview&rsquo;]);</p>
+
+<p>  (function() {</p>
+
+<pre><code>var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+</code></pre>
+
+<p>  })();</p>
+
+<p></script></p>
+
+<pre><code>  &lt;link href="http://www.iteye.com/javascripts/syntaxhighlighter/SyntaxHighlighter.css?1348819953" media="screen" rel="stylesheet" type="text/css" /&gt;
+</code></pre>
+
+<p>  <script src="http://www.iteye.com/javascripts/syntaxhighlighter/shCoreCommon.js?1325907333" type="text/javascript"></script></p>
+
+<script src="http://www.iteye.com/javascripts/hotkey.js?1324994303" type="text/javascript"></script>
+
+
+<p>  <script src="http://www.iteye.com/javascripts/code_favorites.js?1358214518" type="text/javascript"></script></p>
+
+<script src="http://www.iteye.com/javascripts/weiboshare.js?1324994303" type="text/javascript"></script>
+
+
+<p>  </head>
+  <body></p>
+
+<pre><code>&lt;div id="header"&gt;
+  &lt;div id="blog_site_nav"&gt;
+</code></pre>
+
+<p>  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;"></p>
+
+<pre><code>&lt;a target="_blank" href="http://job.iteye.com/iteye"&gt;招聘&lt;/a&gt;
+&lt;a href="http://www.iteye.com/search"&gt;搜索&lt;/a&gt;
+</code></pre>
+
+<p>  </div>
+</div></p>
+
+<pre><code>  &lt;div id="user_nav"&gt;
+  &lt;a href="http://archulate.github.io/login" class="welcome" title="登录"&gt;您还未登录 !&lt;/a&gt;
+&lt;a href="http://archulate.github.io/login"&gt;登录&lt;/a&gt;
+&lt;a href="http://archulate.github.io/signup" class="nobg"&gt;注册&lt;/a&gt;
+</code></pre>
+
+<p>  </div></p>
+
+<pre><code>&lt;/div&gt;
+
+&lt;div id="page"&gt;
+  &lt;div id="branding" class="clearfix"&gt;
+    &lt;div id="blog_name"&gt;
+      &lt;h1&gt;&lt;a href="http://archulate.github.io/"&gt;pandonix&lt;/a&gt;&lt;/h1&gt;
+    &lt;/div&gt;
+    &lt;div id='fd'&gt;&lt;/div&gt;
+    &lt;div id="blog_navbar"&gt;
+      &lt;ul&gt;
+        &lt;li class='blog_navbar_for'&gt;&lt;a href="http://pandonix.iteye.com"&gt;&lt;strong&gt;博客&lt;/strong&gt;&lt;/a&gt;&lt;/li&gt;
+        &lt;li &gt;&lt;a href="http://archulate.github.io/weibo"&gt;微博&lt;/a&gt;&lt;/li&gt;
+        &lt;li &gt;&lt;a href="http://archulate.github.io/album"&gt;相册&lt;/a&gt;&lt;/li&gt;
+        &lt;li &gt;&lt;a href="http://archulate.github.io/link"&gt;收藏&lt;/a&gt;&lt;/li&gt;
+        &lt;li &gt;&lt;a href="http://archulate.github.io/blog/guest_book"&gt;留言&lt;/a&gt;&lt;/li&gt;
+        &lt;li &gt;&lt;a href="http://archulate.github.io/blog/profile"&gt;关于我&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+
+      &lt;div class="search"&gt;
+        &lt;form action="/blog/search" method="get"&gt;
+          &lt;input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="" /&gt;
+          &lt;input class="submit_search" type="submit" value="" /&gt;
+        &lt;/form&gt;
+      &lt;/div&gt; 
+      &lt;div id="fd"&gt;&lt;/div&gt;         
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div id="content" class="clearfix"&gt;
+    &lt;div id="main"&gt;
+</code></pre>
+
+<div class="h-entry" style='display:none'>
+  <a href="http://pandonix.iteye.com" class="p-author" target="_blank">pandonix</a>
+</div>
+
+
+
+
+<p><div class="blog_main">
+  <div class="blog_title"></p>
+
+<pre><code>&lt;h3&gt;
+  &lt;a href="http://archulate.github.io/blog/336873"&gt;Spring AOP 详解&lt;/a&gt;
+  &lt;em class="actions"&gt;      &lt;/em&gt;
+&lt;/h3&gt;
+&lt;ul class='blog_categories'&gt;&lt;strong&gt;博客分类：&lt;/strong&gt; &lt;li&gt;&lt;a href="http://archulate.github.io/category/20309"&gt;J2EE&lt;/a&gt;&lt;/li&gt; &lt;/ul&gt;
+    &lt;div class='news_tag'&gt;&lt;a href="http://www.iteye.com/blogs/tag/AOP"&gt;AOP&lt;/a&gt;&lt;a href="http://www.iteye.com/blogs/tag/Spring"&gt;Spring&lt;/a&gt;&lt;a href="http://www.iteye.com/blogs/tag/junit"&gt;junit&lt;/a&gt;&lt;a href="http://www.iteye.com/blogs/tag/Bean"&gt;Bean&lt;/a&gt;&lt;a href="http://www.iteye.com/blogs/tag/JDK"&gt;JDK&lt;/a&gt;&amp;nbsp;&lt;/div&gt;
+</code></pre>
+
+<p>  </div></p>
+
+<p>  <div id="blog_content" class="blog_content"></p>
+
+<pre><code>&lt;p&gt;      此前对于AOP的使用仅限于声明式事务，除此之外在实际开发中也没有遇到过与之相关的问题。最近项目中遇到了以下几点需求，仔细思考之后，觉得采用AOP
+</code></pre>
+
+<p>来解决。一方面是为了以更加灵活的方式来解决问题，另一方面是借此机会深入学习Spring
+AOP相关的内容。本文是权当本人的自己AOP学习笔记，以下需求不用AOP肯定也能解决，至于是否牵强附会，仁者见仁智者见智。</p>
+<ol>
+<li></p>
+
+<pre><code>对部分函数的调用进行日志记录，用于观察特定问题在运行过程中的函数调用情况&lt;/li&gt;
+</code></pre>
+
+<p><li>监控部分重要函数，若抛出指定的异常，需要以短信或邮件方式通知相关人员</li>
+<li>金控部分重要函数的执行时间</li>
+</ol>
+<p>    事实上，以上需求没有AOP也能搞定，只是在实现过程中比较郁闷摆了。</p>
+<ol>
+<li>需要打印日志的函数分散在各个包中，只能找到所有的函数体，手动添加日志。然而这些日志都是临时的，待问题解决之后应该需要清除打印日志的代码，只能再次手动清除^_^!</li>
+<li>类
+似1的情况，需要捕获异常的地方太多，如果手动添加时想到很可能明天又要手动清除，只能再汗。OK，该需求相对比较固定，属于长期监控的范畴，并不需求临
+时添加后再清除。然而，客户某天要求，把其中20%的异常改为短信提醒，剩下的80%改用邮件提醒。改之，两天后，客户抱怨短信太多，全部改成邮件提
+醒&hellip;</li>
+<li>该需求通常用于监控某些函数的执行时间，用以判断系统执行慢的瓶颈所在。瓶颈被解决之后，烦恼同情况1</li>
+</ol>
+<p><br />
+<span>    </span>
+终于下定决心，采用AOP来解决！代码如下：</p>
+<p> </p>
+<p>    切面类TestAspect</p>
+<pre name="code" class="java">package com.spring.aop;
+/<em>*
+ * 切面
+ *
+ </em>/
+public class TestAspect {</p>
+
+<pre><code>public void doAfter(JoinPoint jp) {
+    System.out.println("log Ending method: "
+            + jp.getTarget().getClass().getName() + "."
+            + jp.getSignature().getName());
+}
+
+public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
+    long time = System.currentTimeMillis();
+    Object retVal = pjp.proceed();
+    time = System.currentTimeMillis() - time;
+    System.out.println("process time: " + time + " ms");
+    return retVal;
+}
+
+public void doBefore(JoinPoint jp) {
+    System.out.println("log Begining method: "
+            + jp.getTarget().getClass().getName() + "."
+            + jp.getSignature().getName());
+}
+
+public void doThrowing(JoinPoint jp, Throwable ex) {
+    System.out.println("method " + jp.getTarget().getClass().getName()
+            + "." + jp.getSignature().getName() + " throw exception");
+    System.out.println(ex.getMessage());
+}
+
+private void sendEx(String ex) {
+    //TODO 发送短信或邮件提醒
+}
+</code></pre>
+
+<p>} </pre>
+<p> </p>
+<p> </p>
+<pre name="code" class="java">package com.spring.service;
+/<em>*
+ * 接口A
+ </em>/
+public interface AService {</p>
+
+<pre><code>public void fooA(String _msg);
+
+public void barA();
+</code></pre>
+
+<p>}</pre></p>
+
+<p><pre name="code" class="java">package com.spring.service;
+/<em><em>
+ </em>接口A的实现类
+ </em>/
+public class AServiceImpl implements AService {</p>
+
+<pre><code>public void barA() {
+    System.out.println("AServiceImpl.barA()");
+}
+
+public void fooA(String _msg) {
+    System.out.println("AServiceImpl.fooA(msg:"+_msg+")");
+}
+</code></pre>
+
+<p>}</pre>
+<p> </p>
+<p> </p>
+<pre name="code" class="java">package com.spring.service;</p>
+
+<p>/<em>*
+ *   Service类B
+ </em>/
+public class BServiceImpl {</p>
+
+<pre><code>public void barB(String _msg, int _type) {
+    System.out.println("BServiceImpl.barB(msg:"+_msg+" type:"+_type+")");
+    if(_type == 1)
+        throw new IllegalArgumentException("测试异常");
+}
+
+public void fooB() {
+    System.out.println("BServiceImpl.fooB()");
+}
+</code></pre>
+
+<p>}</pre></p>
+
+<p><p>    ApplicationContext</p>
+<pre name="code" class="java">&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;UTF-8&rdquo;?&gt;
+&lt;beans xmlns=&ldquo;<a href="http://www.springframework.org/schema/beans">http://www.springframework.org/schema/beans</a>&rdquo;</p>
+
+<pre><code>xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:aop="http://www.springframework.org/schema/aop"
+xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"
+default-autowire="autodetect"&amp;gt;
+&amp;lt;aop:config&amp;gt;
+    &amp;lt;aop:aspect id="TestAspect" ref="aspectBean"&amp;gt;
+        &amp;lt;!--配置com.spring.service包下所有类或接口的所有方法--&amp;gt;
+        &amp;lt;aop:pointcut id="businessService"
+            expression="execution(* com.spring.service.*.*(..))" /&amp;gt;
+        &amp;lt;aop:before pointcut-ref="businessService" method="doBefore"/&amp;gt;
+        &amp;lt;aop:after pointcut-ref="businessService" method="doAfter"/&amp;gt;
+        &amp;lt;aop:around pointcut-ref="businessService" method="doAround"/&amp;gt;
+        &amp;lt;aop:after-throwing pointcut-ref="businessService" method="doThrowing" throwing="ex"/&amp;gt;
+    &amp;lt;/aop:aspect&amp;gt;
+&amp;lt;/aop:config&amp;gt;
+
+&amp;lt;bean id="aspectBean" class="com.spring.aop.TestAspect" /&amp;gt;
+&amp;lt;bean id="aService" class="com.spring.service.AServiceImpl"&amp;gt;&amp;lt;/bean&amp;gt;
+&amp;lt;bean id="bService" class="com.spring.service.BServiceImpl"&amp;gt;&amp;lt;/bean&amp;gt;
+</code></pre>
+
+<p>&lt;/beans&gt;</pre>
+<p> </p>
+<p>    测试类AOPTest</p>
+<pre name="code" class="java">public class AOPTest extends AbstractDependencyInjectionSpringContextTests {</p>
+
+<pre><code>private AService aService;
+
+private BServiceImpl bService;
+
+protected String[] getConfigLocations() {
+    String[] configs = new String[] { "/applicationContext.xml"};
+    return configs;
+}
+
+
+/**
+ * 测试正常调用
+ */
+public void testCall()
+{
+    System.out.println("SpringTest JUnit test");
+    aService.fooA("JUnit test fooA");
+    aService.barA();
+    bService.fooB();
+    bService.barB("JUnit test barB",0);
+}
+
+/**
+ * 测试After-Throwing
+ */
+public void testThrow()
+{
+    try {
+        bService.barB("JUnit call barB",1);
+    } catch (IllegalArgumentException e) {
+
+    }
+}
+
+public void setAService(AService service) {
+    aService = service;
+}
+
+public void setBService(BServiceImpl service) {
+    bService = service;
+}
+</code></pre>
+
+<p>}</pre>
+<p> </p>
+<p>    运行结果如下：</p>
+<pre name="code" class="java">log Begining method: com.spring.service.AServiceImpl.fooA
+AServiceImpl.fooA(msg:JUnit test fooA)
+log Ending method: com.spring.service.AServiceImpl.fooA
+process time: 0 ms
+log Begining method: com.spring.service.AServiceImpl.barA
+AServiceImpl.barA()
+log Ending method: com.spring.service.AServiceImpl.barA
+process time: 0 ms
+log Begining method: com.spring.service.BServiceImpl.fooB
+BServiceImpl.fooB()
+log Ending method: com.spring.service.BServiceImpl.fooB
+process time: 0 ms
+log Begining method: com.spring.service.BServiceImpl.barB
+BServiceImpl.barB(msg:JUnit test barB type:0)
+log Ending method: com.spring.service.BServiceImpl.barB
+process time: 0 ms</p>
+
+<p>log Begining method: com.spring.service.BServiceImpl.barB
+BServiceImpl.barB(msg:JUnit call barB type:1)
+log Ending method: com.spring.service.BServiceImpl.barB
+method com.spring.service.BServiceImpl.barB throw exception
+测试异常</pre></p>
+
+<p><p>    《Spring参考手册》中定义了以下几个AOP的重要概念，结合以上代码分析如下：</p>
+<ul>
+<li><span style="color: #0000ff;">切面（Aspect）</span>
+：官方的抽象定义为“一个关注点的模块化，这个关注点可能会横切多个对象”，在本例中，“切面”就是类TestAspect所关注的具体行为，例如，AServiceImpl.barA()的调用就是切面TestAspect所关注的行为之一。“切面”在ApplicationContext中&lt;aop:aspect&gt;来配置。</li>
+<li><span style="color: #0000ff;">连接点（Joinpoint）</span>
+：程序执行过程中的某一行为，例如，AServiceImpl.barA()的调用或者BServiceImpl.barB(String <em>msg, int </em>type)抛出异常等行为。</li>
+<li><span style="color: #0000ff;">通知（Advice）</span>
+：“切面”对于某个“连接点”所产生的动作，例如，TestAspect中对com.spring.service包下所有类的方法进行日志记录的动作就是一个Advice。其中，一个“切面”可以包含多个“Advice”，例如TestAspect</li>
+<li><span style="color: #0000ff;">切入点（Pointcut）</span>
+：匹配连接点的断言，在AOP中通知和一个切入点表达式关联。例如，TestAspect中的所有通知所关注的连接点，都由切入点表达式execution(<em> com.spring.service.</em>.<em>(..))来决定</li>
+<li><span style="color: #0000ff;">目标对象（Target Object）</span>
+：被一个或者多个切面所通知的对象。例如，AServcieImpl和BServiceImpl，当然在实际运行时，Spring AOP采用代理实现，实际AOP操作的是TargetObject的代理对象。</li>
+<li><span style="color: #0000ff;">AOP代理（AOP Proxy）</span>
+在Spring AOP中有两种代理方式，JDK动态代理和CGLIB代理。默认情况下，TargetObject实现了接口时，则采用JDK动态代理，例如，AServiceImpl；反之，采用CGLIB代理，例如，BServiceImpl。强制使用CGLIB代理需要将 <code class="literal">&lt;aop:config&gt;</code>
+ 的 <code class="literal">proxy-target-class</code>
+ 属性设为true</li>
+</ul>
+<p>       <span style="color: #0000ff;">通知（Advice）类型</span>
+</p>
+<ul>
+<li><span style="color: #0000ff;">前置通知（Before advice）</span>
+：在某连接点（JoinPoint）之前执行的通知，但这个通知不能阻止连接点前的执行。ApplicationContext中在&lt;aop:aspect&gt;里面使用&lt;aop:before&gt;元素进行声明。例如，TestAspect中的doBefore方法</li>
+<li><span style="color: #0000ff;">后通知（After advice）</span>
+：当某连接点退出的时候执行的通知（不论是正常返回还是异常退出）。ApplicationContext中在&lt;aop:aspect&gt;里面使用&lt;aop:after&gt;元素进行声明。例如，TestAspect中的doAfter方法，所以AOPTest中调用BServiceImpl.barB抛出异常时，doAfter方法仍然执行</li>
+<li><span style="color: #0000ff;">返回后通知（After return advice）</span>
+：在某连接点正常完成后执行的通知，不包括抛出异常的情况。ApplicationContext中在&lt;aop:aspect&gt;里面使用&lt;after-returning&gt;元素进行声明。</li>
+<li><span style="color: #0000ff;">环绕通知（Around advice）</span>
+：包围一个连接点的通知，类似Web中Servlet规范中的Filter的doFilter方法。可以在方法的调用前后完成自定义的行为，也可以选择不执行。ApplicationContext中在&lt;aop:aspect&gt;里面使用&lt;aop:around&gt;元素进行声明。例如，TestAspect中的doAround方法。</li>
+<li><span style="color: #0000ff;">抛出异常后通知（After throwing advice）</span>
+：
+在方法抛出异常退出时执行的通知。 ApplicationContext中在&lt;aop:aspect&gt;里面使用&lt;aop:after-throwing&gt;元素进行声明。例如，TestAspect中的doThrowing方法。</li>
+</ul>
+<p>       <span style="color: #0000ff;">切入点表达式</span>
+</p>
+<ul>
+<li>通常情况下，表达式中使用”execution“就可以满足大部分的要求。表达式格式如下：</li>
+</ul>
+<pre name="code" class="java">execution(modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern) throws-pattern?)</pre>
+<p style="padding-left: 30px;">modifiers-pattern：方法的操作权限</p>
+<p style="padding-left: 30px;">ret-type-pattern：返回值</p>
+<p style="padding-left: 30px;">declaring-type-pattern：方法所在的包</p>
+<p style="padding-left: 30px;">name-pattern：方法名</p>
+<p style="padding-left: 30px;">parm-pattern：参数名</p>
+<p style="padding-left: 30px;">throws-pattern：异常</p>
+<p style="padding-left: 30px;">其中，除ret-type-pattern和name-pattern之外，其他都是可选的。上例中，execution(</em> com.spring.service.<em>.</em>(..))表示com.spring.service包下，返回值为任意类型；方法名任意；参数不作限制的所有方法。</p>
+<ul>
+<li>通知参数</li>
+</ul>
+<p style="padding-left: 30px;">可以通过args来绑定参数，这样就可以在通知（Advice）中访问具体参数了。例如，&lt;aop:aspect&gt;配置如下</p>
+<pre name="code" class="java">  &lt;aop:config&gt;</p>
+
+<pre><code>    &amp;lt;aop:aspect id="TestAspect" ref="aspectBean"&amp;gt;
+        &amp;lt;aop:pointcut id="businessService"
+            expression="execution(* com.spring.service.*.*(String,..)) and args(msg,..)" /&amp;gt;
+            &amp;lt;aop:after pointcut-ref="businessService" method="doAfter"/&amp;gt;
+    &amp;lt;/aop:aspect&amp;gt;
+&amp;lt;/aop:config&amp;gt;&lt;/pre&gt;
+</code></pre>
+
+<p><p style="padding-left: 30px;">TestAspect的doAfter方法中就可以访问msg参数，但这样以来AService中的barA()和BServiceImpl中的barB()就不再是连接点，因为execution(<em> com.spring.service.</em>.*(String,..))只配置第一个参数为String类型的方法。其中，doAfter方法定义如下：</p>
+<pre name="code" class="java">public void doAfter(JoinPoint jp,String msg)</pre>
+<ul>
+<li>  访问当前的连接点</li>
+</ul>
+<p style="padding-left: 30px;">任何通知（Advice）方法可以将第一个参数定义为 <code class="interfacename">org.aspectj.lang.JoinPoint</code>
+ 类型。<code class="interfacename">JoinPoint</code>
+ 接口提供了一系列有用的方法， 比如 <code class="literal">getArgs()</code>
+（返回方法参数）、<code class="literal">getThis()</code>
+（返回代理对象）、<code class="literal">getTarget()</code>
+（返回目标）、<code class="literal">getSignature()</code>
+（返回正在被通知的方法相关信息）和 <code class="literal">toString()</code>
+（打印出正在被通知的方法的有用信息。</p>
+<p> </p>
+<p> </p>
+<p> </p>
+  </div></p>
+]]></content>
+  </entry>
+  
+</feed>
