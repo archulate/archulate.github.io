@@ -7,7 +7,7 @@ title: Archulate's Blog
 subtitle: test System maintence work blog
 author: Archulate
 simple_search: http://google.com/search
-description:
+description: 这是李立夫的系统运维技术博客，欢迎来访
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
@@ -19,7 +19,7 @@ date_format: "ordinal"
 subscribe_rss: /atom.xml
 subscribe_email:
 # RSS feeds can list your email address if you like
-email:
+email: archulate@hotmail.com
 
 # ----------------------- #
 #    Jekyll & Plugins     #
